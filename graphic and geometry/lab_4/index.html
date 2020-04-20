@@ -82,6 +82,7 @@
         scale(4);
         drawAxels(400, 300, 50);
 
+        // DRAW 4 LINES EACH IN ANOTHER SECTION
         ctx.lineWidth = 5;
         ctx.strokeStyle = 'black';
         line(0, 0, -60, 50);
@@ -89,6 +90,7 @@
         line(0, 0, 60, -50);
         line(0, 0, -50, -60);
 
+        // DRAW 4 LINES EACH IN ANOTHER SECTION (BRESENHAM ALGORITHM)
         ctx.lineWidth = 1;
         ctx.fillStyle = 'lime';
         bline(0, 0, -60, 50);
@@ -96,10 +98,12 @@
         bline(0, 0, 60, -50);
         bline(0, 0, -50, -60);
 
+        // DRAW LINE FROM GIVEN COORDINATES
         ctx.lineWidth = 5;
         ctx.strokeStyle = 'black';
         line(-3, 2, 0, 12);
 
+        // DRAW LINE FROM GIVEN COORDINATES (BRESENHAM ALGORITHM)
         ctx.lineWidth = 1;
         ctx.fillStyle = 'yellow';
         bline(-3, 2, 0, 12, true);
@@ -107,6 +111,8 @@
       // task_1();
 
       // TASK 2
+
+      // DRAW GIVEN FIGURE (BRESENHAM ALGORITHM)
       function task_2() {
         document.querySelector('#taskId').innerHTML = 'Active task: 2';
         clear();
@@ -125,6 +131,7 @@
       }
       task_2();
 
+      // SCALE CANVAS (USED FOR TASK 1 FOR BETTER VIEW)
       function scale(zoom) {
         if (zoom) {
           ctx.scale(zoom, zoom);
@@ -138,6 +145,8 @@
       }
 
       // DRAW AXELS
+
+      // DRAW CANVAS AXELS
       function drawAxels(sizeW, sizeH, dec = 100) {
         const offset = 50;
 
@@ -186,6 +195,8 @@
       }
 
       // LINE
+
+      // SIMPLE LINE DRAWER
       function line(x0, y0, x1, y1) {
         x0 += center.x;
         y0 = center.y - y0;
@@ -199,6 +210,8 @@
       }
 
       // BLINE
+
+      // BRESENHAM ALGORITHM LINE DRAWER
       function bline(x0, y0, x1, y1, log = false) {
         x0 += center.x;
         y0 = center.y - y0;
@@ -238,6 +251,8 @@
           console.log(pixels);
         }
       }
+
+      // DRAW PIXEL BY COORDINATES FROM BRESENHAM ALGORITHM
       function setPixel(x, y) {
         ctx.beginPath();
         ctx.arc(x, y, ctx.lineWidth / 2, 0, Math.PI * 2);

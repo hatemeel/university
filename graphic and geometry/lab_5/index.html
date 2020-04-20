@@ -101,6 +101,7 @@
 
       const BLOCK_SIZE = 30;
 
+      // GET AND SET CANVAS SIZE AS SMALLER SIDE
       let w =
         container.offsetWidth < container.offsetHeight
           ? container.offsetWidth
@@ -115,6 +116,7 @@
       const headColor = '#6B5B95';
       const foodColor = '#FF6F61';
 
+      // GENERAL SNAKE CLASS
       class Snake {
         active = false;
         speed = 120;
@@ -124,15 +126,17 @@
         blocks = [new Block()];
         food = new Food(this.blocks);
 
+        // SET PLAYER SCORE
         setScore() {
           document.querySelector('#score').innerHTML = `Score: ${this.score}`;
 
+          // INCREASE SNAKE SPEED ON EACH 10 POINTS
           if (this.score % 10 === 0 && this.speed > 50) {
             this.speed -= 5;
           }
         }
 
-        // check for food collision
+        // CHECK FOR SNAKE AND FOOD COLLISION
         checkForFood() {
           if (
             this.blocks[0].posX === this.food.posX &&
@@ -151,7 +155,7 @@
           }
         }
 
-        // check for self collision
+        // CHECK FOR SELF COLLISION
         checkForSelf() {
           const head = this.blocks[0];
           this.blocks.map((b, i) => {
@@ -161,7 +165,7 @@
           });
         }
 
-        // end game
+        // END OF GAME (CALL IF FAULT)
         fault() {
           toggleSnake();
           ctx.clearRect(0, 0, w, h);
@@ -174,7 +178,7 @@
           this.direction = 'right';
         }
 
-        // draw snake blocks
+        // DRAW SNAKE BODY BLOCKS
         draw() {
           this.blocks.map((block, i) => {
             if (i !== 0) {
@@ -185,7 +189,7 @@
           this.food.draw();
         }
 
-        // snake move logic
+        // SNAKE MOVE LOGIC
         update() {
           if (!this.active) return;
           this.direction = this.tmpDir;
@@ -221,6 +225,7 @@
         }
       }
 
+      // GENERAL BLOCK CLASS
       class Block {
         posX;
         posY;
@@ -247,6 +252,7 @@
           this.draw();
         }
 
+        // DRAW SNAKE BODY BLOCK
         draw() {
           ctx.fillStyle = this.color;
           ctx.fillRect(this.posX, this.posY, BLOCK_SIZE, BLOCK_SIZE);
@@ -256,6 +262,7 @@
         }
       }
 
+      // GENERAL FOOD CLASS
       class Food {
         posX =
           Math.round(Math.random() * ((w - BLOCK_SIZE) / BLOCK_SIZE)) *
@@ -267,6 +274,7 @@
         constructor(blocks) {
           this.draw();
 
+          // LOOK FOR EMPTY COORDINATES
           while (
             blocks.filter((b) => b.posX === this.posX && b.posY === this.posY)
               .length
@@ -275,6 +283,7 @@
           }
         }
 
+        // FOOD POSITION GENERATOR
         genPos() {
           this.posX =
             Math.round(Math.random() * ((w - BLOCK_SIZE) / BLOCK_SIZE)) *
@@ -284,6 +293,7 @@
             BLOCK_SIZE;
         }
 
+        // DRAW FOOD ELEMENT
         draw() {
           ctx.fillStyle = foodColor;
           ctx.beginPath();
@@ -301,11 +311,13 @@
 
       const snake = new Snake();
 
+      // START OR PAUSE GAME
       function toggleSnake() {
         snake.active = !snake.active;
         document.querySelector('.canvas-wrap').classList.toggle('pause');
       }
 
+      // MAIN ANIMATION FUNCTION
       function animate() {
         if (snake.active) {
           ctx.clearRect(0, 0, w, h);
@@ -319,12 +331,15 @@
       }
       animate();
 
+      // CONTR DIRECTIONS HELPER
       const contDir = {
         right: 'left',
         left: 'right',
         up: 'down',
         down: 'up',
       };
+
+      // WATCH FOR KEY PRESSING AND SET APPROPRIATE SNAKE MOVE DIRECTION
       document.onkeydown = (event) => {
         if (event.code.includes('Arrow') && snake.active) {
           const dir = event.code.replace('Arrow', '').toLowerCase();
@@ -332,6 +347,8 @@
             snake.tmpDir = dir;
           }
         }
+
+        // START OR STOP GAME IF "Space" PRESSED
         if (event.code === 'Space') {
           toggleSnake();
         }

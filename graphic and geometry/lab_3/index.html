@@ -78,6 +78,7 @@
       let imgCoef = 0;
       image.width = 400;
 
+      // WAITING FOR LOADING SELECTED IMAGE
       async function loadImage(event) {
         image.src = await readFile(event.target.files[0]);
         defSrc = image.src;
@@ -87,10 +88,13 @@
         fitImageOn(canvas, image);
       }
 
+      // REMOVE RED COLOR FROM IMAGE
       async function removeRed() {
         if (image.src) {
+          // CREATE VIRTUAL CANVAS
           const vCanv = document.createElement('canvas');
 
+          // GET SIZE OF FITTED IMAGE TO CANVAS SIZE
           const size = fitImageOn(canvas, image, true);
 
           vCanv.width = size.width;
@@ -99,11 +103,14 @@
           const vCtx = vCanv.getContext('2d');
           image.src = defSrc;
           await image.onload;
+
+          // LOAD SAME IMAGE TO VIRTUAL CANVAS
           vCtx.drawImage(image, 0, 0, size.width, size.height);
           const imgData = vCtx.getImageData(0, 0, vCanv.width, vCanv.height);
 
           // image data manipulation
 
+          // EACH RED PIXEL REPLACE WITH 0
           imgData.data.map((x, i) => {
             if (i % 4 === 0) {
               imgData.data[i] = 0;
@@ -112,13 +119,17 @@
 
           // =======================
 
+          // SET EDITED IMAGE DATA TO VIRTUAL CANVAS
           vCtx.putImageData(imgData, 0, 0);
 
+          // CONVERT VIRTUAL CANVAS TO BASE64 DATA
           const vData = vCanv.toDataURL();
 
+          // SET EDITED IMAGE SOURCE
           image.src = vData;
           await image.onload;
 
+          // CLEAR CANVAS AND DRAW EDITED IMAGE
           clearCanvas();
           fitImageOn(canvas, image);
         }
@@ -126,6 +137,7 @@
 
       async function selectBorders() {
         if (image.src) {
+          // HERE SAME ACTIONS AS IN PREVIOUS FUNCTION
           const vCanv = document.createElement('canvas');
 
           const size = fitImageOn(canvas, image, true);
@@ -141,6 +153,7 @@
 
           // image data manipulation
 
+          // ALL PIXEL DATA GROUP TO ARRAYS OF DATA OF EACH PIXEL
           let pixels = groupPixesls(imgData.data);
 
           let row = 0;
@@ -148,6 +161,7 @@
           const sWidth = document.querySelector('#sWidth').value * 1;
           const out = [];
 
+          // SET EACH PIXEL THAT BELONGS TO BORDERS TO RED COLOR
           pixels.map((x, i) => {
             if (i % imgData.width === 0) {
               row++;
@@ -163,6 +177,7 @@
             }
           });
 
+          // FLAT ALL DATA ARRAYS TO ONE
           pixels = out.flat(Infinity);
           pixels.map((x, i) => {
             imgData.data[i] = x;
@@ -170,6 +185,7 @@
 
           // =======================
 
+          // SAME ACTIONS AS IN PREVIOUS FUNCTION
           vCtx.putImageData(imgData, 0, 0);
 
           const vData = vCanv.toDataURL();
@@ -183,6 +199,8 @@
       }
 
       // ====
+
+      // GET IMAGE FITTED TO CANVAS SIZE AND RETURN ITS PARAMS
       function fitImageOn(c, imageObj, onlySize = false) {
         let context = c.getContext('2d');
         const imageAspectRatio = imageObj.naturalWidth / imageObj.naturalHeight;
@@ -224,10 +242,12 @@
         };
       }
 
+      // CLEAR CANVAS
       function clearCanvas() {
         ctx.clearRect(0, 0, w, h);
       }
 
+      // GROUP PIXEL DATA FUNCTION
       function groupPixesls(data) {
         const grouped = [];
         data = [...data];
@@ -240,6 +260,7 @@
         return grouped;
       }
 
+      // FILEREAD FUNCTION
       function readFile(file) {
         return new Promise((resolve, reject) => {
           let reader = new FileReader();
