@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      @import url(https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css);
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100vh;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      button {
+        padding: 0 5px;
+      }
+
+      label {
+        margin: 0;
+      }
+
+      canvas {
+        border: 1px solid black;
+      }
+
+      .container-fluid {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .canvas-container {
+        flex: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="canvas-container">
+        <canvas></canvas>
+      </div>
+
+      <div class="controls d-flex align-items-center">
+        <div onclick="task_1()" class="btn btn-sm btn-primary">TASK 1</div>
+        <div onclick="task_2()" class="btn btn-sm btn-primary ml-2">TASK 2</div>
+
+        <div class="ml-3" id="taskId">Active task: 2</div>
+      </div>
+    </div>
+
+    <script>
+      const container = document.querySelector('.canvas-container');
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+
+      let w = container.offsetWidth;
+      let h = container.offsetHeight;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      const center = {
+        x: w / 2,
+        y: h / 2,
+      };
+
+      // TASK 1
+      function task_1() {
+        document.querySelector('#taskId').innerHTML = 'Active task: 1';
+        clear();
+        scale(4);
+        drawAxels(400, 300, 50);
+
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = 'black';
+        line(0, 0, -60, 50);
+        line(0, 0, 50, 60);
+        line(0, 0, 60, -50);
+        line(0, 0, -50, -60);
+
+        ctx.lineWidth = 1;
+        ctx.fillStyle = 'lime';
+        bline(0, 0, -60, 50);
+        bline(0, 0, 50, 60);
+        bline(0, 0, 60, -50);
+        bline(0, 0, -50, -60);
+
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = 'black';
+        line(-3, 2, 0, 12);
+
+        ctx.lineWidth = 1;
+        ctx.fillStyle = 'yellow';
+        bline(-3, 2, 0, 12, true);
+      }
+      // task_1();
+
+      // TASK 2
+      function task_2() {
+        document.querySelector('#taskId').innerHTML = 'Active task: 2';
+        clear();
+        scale();
+        drawAxels(400, 300);
+
+        const figW = 80;
+        const zig = 1.5;
+
+        ctx.fillStyle = 'coral';
+        for (let i = -figW; i <= figW; i += figW / 2) {
+          bline(0, 200, i, -50);
+          bline(i, -50, i - i / zig, -95);
+          bline(i - i / zig, -95, 0, -95);
+        }
+      }
+      task_2();
+
+      function scale(zoom) {
+        if (zoom) {
+          ctx.scale(zoom, zoom);
+          center.x = w / 2 / zoom;
+          center.y = h / 2 / zoom;
+        } else {
+          ctx.scale(1 / ctx.getTransform().a, 1 / ctx.getTransform().a);
+          center.x = w / 2;
+          center.y = h / 2;
+        }
+      }
+
+      // DRAW AXELS
+      function drawAxels(sizeW, sizeH, dec = 100) {
+        const offset = 50;
+
+        // draw axel lines
+        ctx.fillStyle = 'dimgray';
+        ctx.beginPath();
+        ctx.moveTo(center.x, center.y - sizeH - offset);
+        ctx.lineTo(center.x, center.y + sizeH + offset);
+        ctx.moveTo(center.x - sizeW - offset, center.y);
+        ctx.lineTo(center.x + sizeW + offset, center.y);
+
+        // draw axel points
+        ctx.font = `12px Arial`;
+        ctx.textAlign = 'center';
+        for (let i = -sizeW; i <= sizeW; i++) {
+          if (i % dec === 0) {
+            if (i === 0) {
+              ctx.fillText(i, center.x + i - 15, center.y + 20);
+            } else {
+              ctx.fillText(i, center.x + i, center.y + 20);
+            }
+            ctx.moveTo(center.x + i, center.y - 5);
+            ctx.lineTo(center.x + i, center.y + 5);
+          }
+        }
+        ctx.textAlign = 'right';
+        for (let i = -sizeH; i <= sizeH; i++) {
+          if (i % dec === 0) {
+            if (i !== 0) {
+              ctx.fillText(i, center.x - 15, center.y - i + 3.5);
+            }
+
+            ctx.moveTo(center.x - 5, center.y - i);
+            ctx.lineTo(center.x + 5, center.y - i);
+          }
+        }
+
+        ctx.strokeStyle = 'gray';
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // CLEAR CANVAS
+      function clear() {
+        ctx.clearRect(0, 0, w, h);
+      }
+
+      // LINE
+      function line(x0, y0, x1, y1) {
+        x0 += center.x;
+        y0 = center.y - y0;
+        x1 += center.x;
+        y1 = center.y - y1;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // BLINE
+      function bline(x0, y0, x1, y1, log = false) {
+        x0 += center.x;
+        y0 = center.y - y0;
+        x1 += center.x;
+        y1 = center.y - y1;
+
+        let dx = Math.abs(x1 - x0),
+          sx = x0 < x1 ? 1 : -1;
+        let dy = Math.abs(y1 - y0),
+          sy = y0 < y1 ? 1 : -1;
+        let err = (dx > dy ? dx : -dy) / 2;
+
+        const pixels = [];
+
+        while (true) {
+          setPixel(x0, y0);
+
+          pixels.push({ x: x0 - center.x, y: y0 - center.y, err });
+
+          if (
+            Math.round(x0) === Math.round(x1) &&
+            Math.round(y0) === Math.round(y1)
+          )
+            break;
+          let e2 = err;
+          if (e2 > -dx) {
+            err -= dy;
+            x0 += sx;
+          }
+          if (e2 < dy) {
+            err += dx;
+            y0 += sy;
+          }
+        }
+
+        if (log) {
+          console.log(pixels);
+        }
+      }
+      function setPixel(x, y) {
+        ctx.beginPath();
+        ctx.arc(x, y, ctx.lineWidth / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+    </script>
+  </body>
+</html>

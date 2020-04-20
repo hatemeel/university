@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      body {
+        height: calc(100vh - 16px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+
+    <script>
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+
+      let w = document.body.offsetWidth;
+      let h = document.body.offsetHeight;
+
+      w = w < h ? w : h;
+      h = w < h ? w : h;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      const points = [];
+      let figures = [];
+
+      const figureMax = w < h ? w / 3 - 50 : h / 3 - 50;
+      let curentFigure = Math.round(Math.random()) ? 'circle' : 'cross';
+      let haveWinner = false;
+
+      for (let i = 0; i < 4; i++) {
+        const point = { x: (w / 3) * i };
+
+        for (let j = 0; j < 4; j++) {
+          point.y = (h / 3) * j;
+
+          points.push({ ...point });
+        }
+      }
+
+      // draw grid lines
+      function drawGrid() {
+        ctx.clearRect(0, 0, w, h);
+        ctx.beginPath();
+        ctx.lineWidth = 0.2;
+        points.map(point => {
+          ctx.moveTo(point.x, 0);
+          ctx.lineTo(point.x, h);
+
+          ctx.moveTo(0, point.y);
+          ctx.lineTo(w, point.y);
+
+          ctx.stroke();
+        });
+      }
+
+      // getting center of clicked box
+      function getTriggeredPoint(x, y) {
+        if (haveWinner || x > w) {
+          return;
+        }
+
+        let out = [...points]
+          .sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x))
+          .splice(0, 8)
+          .sort((a, b) => Math.abs(a.y - y) - Math.abs(b.y - y))
+          .splice(0, 4);
+
+        const center = {
+          x: (out[0].x - out[1].x) / 2 + out[1].x,
+          y: (out[1].y - out[2].y) / 2 + out[2].y
+        };
+
+        if (
+          !figures.find(f => f.center.x === center.x && f.center.y === center.y)
+        ) {
+          figures.push({
+            curentFigure,
+            center,
+            location: {
+              row: Math.round(center.y / (h / 3)),
+              col: Math.round(center.x / (w / 3))
+            }
+          });
+        }
+
+        // clear canvas & draw existing figures
+        drawGrid();
+        figures.map(fig => {
+          if (fig.curentFigure === 'cross') {
+            addCross(fig.center, fig.color);
+          } else {
+            addCircle(fig.center, fig.color);
+          }
+        });
+
+        // change current figure
+        checkForWinner();
+        curentFigure = curentFigure === 'circle' ? 'cross' : 'circle';
+      }
+
+      // circle drawer
+      function addCircle({ x, y }, color = 'black') {
+        ctx.beginPath();
+        ctx.arc(x, y, figureMax / 2, 0, Math.PI * 2);
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = color;
+        ctx.stroke();
+      }
+
+      // cross drawer
+      function addCross({ x, y }, color = 'black') {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - figureMax / 2, y - figureMax / 2);
+        ctx.lineTo(x + figureMax / 2, y + figureMax / 2);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + figureMax / 2, y - figureMax / 2);
+        ctx.lineTo(x - figureMax / 2, y + figureMax / 2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 10;
+        ctx.stroke();
+      }
+
+      const checkers = [
+        (item, i) => item.location.row === i,
+        (item, i) => item.location.col === i,
+        (item, i) => item.location.row === item.location.col,
+        (item, i) => item.location.row + item.location.col === 4
+      ];
+
+      // check for winner
+      function checkForWinner() {
+        ['circle', 'cross'].map(fv => {
+          const items = figures.filter(f => f.curentFigure === fv);
+
+          for (let i = 1; i <= 3; i++) {
+            for (const checker of checkers) {
+              if (items.filter(item => checker(item, i)).length === 3) {
+                return setWinner(fv, checker, i);
+              }
+            }
+          }
+        });
+      }
+
+      function setWinner(winner, checker, index) {
+        // console.log(`${winner} win`);
+        haveWinner = true;
+        figures
+          .filter(f => f.curentFigure === winner && checker(f, index))
+          .map(f => {
+            f.color = 'red';
+            return f;
+          });
+
+        // draw existing figures
+        figures.map(fig => {
+          if (fig.curentFigure === 'cross') {
+            addCross(fig.center, fig.color);
+          } else {
+            addCircle(fig.center, fig.color);
+          }
+        });
+      }
+
+      drawGrid();
+      window.onclick = ({ x, y }) =>
+        getTriggeredPoint(x - canvas.offsetLeft, y - canvas.offsetTop);
+    </script>
+  </body>
+</html>

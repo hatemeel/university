@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      @import url(https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css);
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100vh;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      button {
+        padding: 0 5px;
+      }
+
+      label {
+        margin: 0;
+      }
+
+      canvas {
+        border: 1px solid black;
+      }
+
+      .container-fluid {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .canvas-container {
+        flex: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .canvas-wrap {
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        width: fit-content;
+      }
+
+      .canvas-wrap.pause::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      .canvas-wrap.pause::after {
+        content: 'Press "Space" to start or stop the game';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div
+        id="score"
+        class="rounded bg-primary text-white mb-2 py-2 text-center"
+      >
+        Score: 0
+      </div>
+
+      <div class="canvas-container">
+        <div class="canvas-wrap rounded-lg pause">
+          <canvas class="rounded-lg pause"></canvas>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center mt-2">
+        <div onclick="toggleSnake()" class="btn btn-primary btn-block">
+          Start / Stop (Space)
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const container = document.querySelector('.canvas-container');
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+
+      const BLOCK_SIZE = 30;
+
+      let w =
+        container.offsetWidth < container.offsetHeight
+          ? container.offsetWidth
+          : container.offsetHeight;
+      w = BLOCK_SIZE * Math.floor(w / BLOCK_SIZE);
+      let h = w;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      const blockColor = '#88B04B';
+      const headColor = '#6B5B95';
+      const foodColor = '#FF6F61';
+
+      class Snake {
+        active = false;
+        speed = 120;
+        tmpDir = 'right';
+        direction = 'right';
+        score = 0;
+        blocks = [new Block()];
+        food = new Food(this.blocks);
+
+        setScore() {
+          document.querySelector('#score').innerHTML = `Score: ${this.score}`;
+
+          if (this.score % 10 === 0 && this.speed > 50) {
+            this.speed -= 5;
+          }
+        }
+
+        // check for food collision
+        checkForFood() {
+          if (
+            this.blocks[0].posX === this.food.posX &&
+            this.blocks[0].posY === this.food.posY
+          ) {
+            this.score++;
+            this.setScore();
+            this.food = new Food(this.blocks);
+
+            this.blocks.push(
+              new Block(
+                this.blocks[this.blocks.length - 1].posX,
+                this.blocks[this.blocks.length - 1].posY
+              )
+            );
+          }
+        }
+
+        // check for self collision
+        checkForSelf() {
+          const head = this.blocks[0];
+          this.blocks.map((b, i) => {
+            if (i !== 0 && head.posX === b.posX && head.posY === b.posY) {
+              this.fault();
+            }
+          });
+        }
+
+        // end game
+        fault() {
+          toggleSnake();
+          ctx.clearRect(0, 0, w, h);
+          this.score = 0;
+          this.speed = 120;
+          this.setScore();
+          this.blocks = [new Block()];
+          this.food = new Food(this.blocks);
+          this.tmpDir = 'right';
+          this.direction = 'right';
+        }
+
+        // draw snake blocks
+        draw() {
+          this.blocks.map((block, i) => {
+            if (i !== 0) {
+              block.color = blockColor;
+            }
+            block.draw();
+          });
+          this.food.draw();
+        }
+
+        // snake move logic
+        update() {
+          if (!this.active) return;
+          this.direction = this.tmpDir;
+
+          let bx;
+          let by;
+
+          if (this.direction === 'right') {
+            this.blocks.unshift(
+              new Block(this.blocks[0].posX + BLOCK_SIZE, this.blocks[0].posY)
+            );
+          }
+          if (this.direction === 'left') {
+            this.blocks.unshift(
+              new Block(this.blocks[0].posX - BLOCK_SIZE, this.blocks[0].posY)
+            );
+          }
+          if (this.direction === 'up') {
+            this.blocks.unshift(
+              new Block(this.blocks[0].posX, this.blocks[0].posY - BLOCK_SIZE)
+            );
+          }
+          if (this.direction === 'down') {
+            this.blocks.unshift(
+              new Block(this.blocks[0].posX, this.blocks[0].posY + BLOCK_SIZE)
+            );
+          }
+
+          this.blocks.pop();
+          this.checkForSelf();
+          this.checkForFood();
+          this.draw();
+        }
+      }
+
+      class Block {
+        posX;
+        posY;
+        // color = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
+        color = headColor;
+
+        constructor(x = 0, y = 0) {
+          if (x >= w) {
+            x = 0;
+          }
+          if (x < 0) {
+            x = w - BLOCK_SIZE;
+          }
+          if (y >= h) {
+            y = 0;
+          }
+          if (y < 0) {
+            y = h - BLOCK_SIZE;
+          }
+
+          this.posX = x;
+          this.posY = y;
+
+          this.draw();
+        }
+
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.fillRect(this.posX, this.posY, BLOCK_SIZE, BLOCK_SIZE);
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 5;
+          ctx.strokeRect(this.posX, this.posY, BLOCK_SIZE, BLOCK_SIZE);
+        }
+      }
+
+      class Food {
+        posX =
+          Math.round(Math.random() * ((w - BLOCK_SIZE) / BLOCK_SIZE)) *
+          BLOCK_SIZE;
+        posY =
+          Math.round(Math.random() * ((h - BLOCK_SIZE) / BLOCK_SIZE)) *
+          BLOCK_SIZE;
+
+        constructor(blocks) {
+          this.draw();
+
+          while (
+            blocks.filter((b) => b.posX === this.posX && b.posY === this.posY)
+              .length
+          ) {
+            this.genPos();
+          }
+        }
+
+        genPos() {
+          this.posX =
+            Math.round(Math.random() * ((w - BLOCK_SIZE) / BLOCK_SIZE)) *
+            BLOCK_SIZE;
+          this.posY =
+            Math.round(Math.random() * ((h - BLOCK_SIZE) / BLOCK_SIZE)) *
+            BLOCK_SIZE;
+        }
+
+        draw() {
+          ctx.fillStyle = foodColor;
+          ctx.beginPath();
+          ctx.arc(
+            this.posX + BLOCK_SIZE / 2,
+            this.posY + BLOCK_SIZE / 2,
+            BLOCK_SIZE / 2,
+            0,
+            Math.PI * 2
+          );
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+
+      const snake = new Snake();
+
+      function toggleSnake() {
+        snake.active = !snake.active;
+        document.querySelector('.canvas-wrap').classList.toggle('pause');
+      }
+
+      function animate() {
+        if (snake.active) {
+          ctx.clearRect(0, 0, w, h);
+        }
+
+        setTimeout(() => {
+          animate();
+        }, snake.speed);
+
+        snake.update();
+      }
+      animate();
+
+      const contDir = {
+        right: 'left',
+        left: 'right',
+        up: 'down',
+        down: 'up',
+      };
+      document.onkeydown = (event) => {
+        if (event.code.includes('Arrow') && snake.active) {
+          const dir = event.code.replace('Arrow', '').toLowerCase();
+          if (snake.direction !== contDir[dir]) {
+            snake.tmpDir = dir;
+          }
+        }
+        if (event.code === 'Space') {
+          toggleSnake();
+        }
+      };
+    </script>
+  </body>
+</html>

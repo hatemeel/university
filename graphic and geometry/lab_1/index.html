@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      body {
+        height: calc(100vh - 16px);
+      }
+
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+
+    <script>
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+
+      const w = document.body.offsetWidth;
+      const h = document.body.offsetHeight;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      // light object
+      function Light(x, y, rad) {
+        this.x = x;
+        this.y = y;
+        this.radius = rad;
+        this.lightOffset = 20;
+
+        this.draw = () => {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = 'black';
+          ctx.strokeStyle = 'gold';
+          ctx.lineWidth = 10;
+          ctx.fill();
+          ctx.stroke();
+        };
+
+        this.dropShadow = (box, shadowLength = 0) => {
+          const boxX = box.x - box.width / 2;
+          const boxY = box.y - box.height / 2;
+
+          const tg = (box.height + h / 2 - box.y) / 2 / (boxX - this.x);
+          const rayLength = boxX + box.width + shadowLength;
+          const cofHeight = (rayLength - this.x) * tg;
+          const topPoint = this.y - cofHeight;
+          const bottomPoint = this.y + cofHeight;
+
+          const grd1 = ctx.createLinearGradient(light.x, 0, rayLength, 0);
+          grd1.addColorStop(0, '#00000090');
+          grd1.addColorStop(1, 'white');
+
+          const grd2 = ctx.createLinearGradient(light.x, 0, rayLength, 0);
+          grd2.addColorStop(0, 'yellow');
+          grd2.addColorStop(1, 'white');
+
+          // light ray
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y - this.radius);
+          ctx.lineTo(rayLength, topPoint - this.lightOffset);
+          ctx.lineTo(rayLength, bottomPoint + this.lightOffset);
+          ctx.lineTo(this.x, this.y + this.radius);
+          ctx.fillStyle = grd2;
+          ctx.fill();
+
+          // shadow ray
+          ctx.beginPath();
+          ctx.moveTo(boxX, boxY);
+          ctx.lineTo(rayLength, topPoint);
+          ctx.lineTo(rayLength, bottomPoint);
+          ctx.lineTo(boxX, boxY + box.height);
+          ctx.fillStyle = grd1;
+          ctx.fill();
+
+          // dots
+          // ctx.beginPath();
+          // ctx.arc(rayLength, topPoint, 5, 0, Math.PI * 2);
+          // ctx.arc(rayLength, bottomPoint, 5, 0, Math.PI * 2);
+          // ctx.fillStyle = 'red';
+          // ctx.fill();
+        };
+      }
+
+      // box object
+      function Box(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+
+        this.draw = () => {
+          this.shadow(4);
+
+          ctx.beginPath();
+          ctx.rect(
+            this.x - this.width / 2,
+            this.y - this.height / 2,
+            this.width,
+            this.height
+          );
+          ctx.lineWidth = 1;
+          ctx.fillStyle = '#DFCFBE';
+          ctx.strokeStyle = 'black';
+          ctx.fill();
+          ctx.stroke();
+        };
+
+        this.shadow = shadowOffset => {
+          ctx.beginPath();
+          ctx.rect(
+            this.x - this.width / 2 + shadowOffset,
+            this.y - this.height / 2 + shadowOffset,
+            this.width,
+            this.height
+          );
+          ctx.fillStyle = '#00000040';
+          ctx.fill();
+        };
+      }
+
+      // scene
+      const box1 = new Box(130, h / 2, 30, 70);
+
+      const box2 = new Box(300, h / 2, 30, 70);
+
+      const light = new Light(50, h / 2, 10);
+
+      let activeBox = [box1, box2].sort((a, b) => a.x - b.x)[0];
+      // animating
+      function animate() {
+        ctx.clearRect(0, 0, w, h);
+
+        activeBox = [box1, box2].sort((a, b) => a.x - b.x)[0];
+        light.dropShadow(activeBox, 100);
+        light.draw();
+        box1.draw();
+        box2.draw();
+      }
+      animate();
+
+      // event listeners
+      window.onmousemove = e => {
+        if (e.x > light.x + box1.width) {
+          box1.x = e.x;
+        }
+        requestAnimationFrame(animate);
+      };
+    </script>
+  </body>
+</html>

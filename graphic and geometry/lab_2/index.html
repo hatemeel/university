@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      body {
+        height: calc(100vh - 16px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+
+    <script>
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+
+      let w = document.body.offsetWidth;
+      let h = document.body.offsetHeight;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      function Logo(x, y, rad, moveType, moveRadius) {
+        this.x = x;
+        this.defX = x;
+        this.y = y;
+        this.defY = y;
+
+        this.dx = random(1, 2) === 1 ? 2 : -2;
+        this.dy = random(1, 2) === 1 ? 2 : -2;
+
+        this.radius = rad;
+        this.baseW = rad / 3;
+        this.lineW = 5;
+
+        this.arcMoveAng = 90;
+
+        this.moveType = moveType;
+        this.moveRadius = moveRadius;
+        this.arcMoveDir = random(1, 2) === 1 ? 1 : -1;
+
+        this.draw = () => {
+          ctx.lineWidth = this.lineW;
+          // first line
+          ctx.beginPath();
+          ctx.strokeStyle = 'orange';
+          ctx.moveTo(this.x + this.baseW, this.y + this.baseW);
+          ctx.lineTo(this.x - this.baseW, this.y + this.baseW);
+          ctx.lineTo(this.x - this.baseW, this.y - this.baseW);
+          ctx.bezierCurveTo(
+            this.x - this.baseW,
+            this.y - this.baseW,
+            this.x - this.baseW,
+            this.y - this.baseW * 2.5 - this.lineW,
+            this.x + this.baseW,
+            this.y - this.baseW * 2.5 - this.lineW
+          );
+          ctx.bezierCurveTo(
+            this.x + this.baseW,
+            this.y - this.baseW * 2.5 - this.lineW,
+            this.x + this.baseW * 2.5 + this.lineW,
+            this.y - this.baseW * 2.5 - this.lineW,
+            this.x + this.baseW * 2.5 + this.lineW,
+            this.y - this.baseW
+          );
+          ctx.bezierCurveTo(
+            this.x + this.baseW * 2.5 + this.lineW,
+            this.y - this.baseW,
+            this.x + this.baseW * 2.5 + this.lineW,
+            this.y + this.baseW,
+            this.x + this.baseW,
+            this.y + this.baseW
+          );
+          ctx.stroke();
+
+          // seccond line
+          ctx.beginPath();
+          ctx.strokeStyle = 'black';
+          ctx.moveTo(this.x - this.baseW, this.y - this.baseW);
+          ctx.lineTo(this.x + this.baseW, this.y - this.baseW);
+          ctx.lineTo(this.x + this.baseW, this.y + this.baseW);
+          ctx.bezierCurveTo(
+            this.x + this.baseW,
+            this.y + this.baseW,
+            this.x + this.baseW,
+            this.y + this.baseW * 2.5 + this.lineW,
+            this.x - this.baseW,
+            this.y + this.baseW * 2.5 + this.lineW
+          );
+          ctx.bezierCurveTo(
+            this.x - this.baseW,
+            this.y + this.baseW * 2.5 + this.lineW,
+            this.x - this.baseW * 2.5 - this.lineW,
+            this.y + this.baseW * 2.5 + this.lineW,
+            this.x - this.baseW * 2.5 - this.lineW,
+            this.y + this.baseW
+          );
+          ctx.bezierCurveTo(
+            this.x - this.baseW * 2.5 - this.lineW,
+            this.y + this.baseW,
+            this.x - this.baseW * 2.5 - this.lineW,
+            this.y - this.baseW,
+            this.x - this.baseW,
+            this.y - this.baseW
+          );
+          ctx.stroke();
+        };
+
+        this.update = () => {
+          if (this.moveType === 1) {
+            this.x += this.dx;
+            this.y += this.dy;
+
+            if (this.x - this.radius < 0 || this.x + this.radius > w) {
+              this.dx = -this.dx;
+            }
+            if (this.y - this.radius < 0 || this.y + this.radius > h) {
+              this.dy = -this.dy;
+            }
+          } else if (this.moveType === 2) {
+            const yPos =
+              this.moveRadius * Math.sin((this.arcMoveAng / 180) * Math.PI);
+            const xPos =
+              this.moveRadius * Math.cos((this.arcMoveAng / 180) * Math.PI);
+
+            this.y = this.defX + yPos;
+            this.x = this.defY + xPos;
+
+            this.arcMoveAng += this.arcMoveDir;
+
+            if (this.arcMoveAng >= 360 && this.arcMoveDir > 0) {
+              this.arcMoveAng = 0;
+            }
+
+            if (this.arcMoveAng <= 0 && this.arcMoveDir < 0) {
+              this.arcMoveAng = 360;
+            }
+          }
+
+          this.draw();
+        };
+      }
+
+      const logos = [];
+
+      for (let i = 0; i < 50; i++) {
+        const rad = random(10, 30);
+        const x = random(rad, w - rad);
+        const y = random(rad, h - rad);
+        logos.push(new Logo(x, y, rad, random(1, 2), random(rad, 200)));
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        ctx.clearRect(0, 0, w, h);
+
+        logos.map(logo => {
+          logo.update();
+        });
+      }
+      animate();
+
+      function random(min, max) {
+        return Math.round(Math.random() * (max - min) + min);
+      }
+    </script>
+  </body>
+</html>

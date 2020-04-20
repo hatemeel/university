@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      canvas {
+        border: 1px solid dimgray;
+      }
+      body {
+        height: calc(100vh - 16px);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+
+    <script>
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+
+      const w = document.body.offsetWidth;
+      const h = document.body.offsetHeight;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      // ground
+      let groundMove = true;
+      function Ground(width, height) {
+        this.width = width;
+        this.height = height;
+
+        this.draw = () => {
+          ctx.beginPath();
+          ctx.moveTo(w, h);
+          ctx.lineTo(w - this.width, h);
+          ctx.lineTo(w, h - this.height);
+          ctx.lineTo(w, h);
+          ctx.fillStyle = 'gray';
+          ctx.fill();
+        };
+
+        this.update = () => {
+          if (groundMove && this.height > 100 && ball.x > w - this.width) {
+            // this.height--;
+          }
+
+          this.draw();
+        };
+
+        this.angle = () => {
+          const c = Math.sqrt(
+            Math.pow(this.width, 2) + Math.pow(this.height, 2)
+          );
+
+          return {
+            x: Math.asin(this.width / c),
+            y: Math.asin(this.height / c)
+          };
+        };
+
+        this.getHeight = x => {
+          const angW = this.angle().x;
+          const angH = this.angle().y;
+
+          const cPos = (this.width - x) / Math.sin(angW);
+          const yPos = cPos * Math.sin(angH);
+
+          return h - yPos;
+        };
+      }
+
+      // ball
+      function Ball(x, y, rad) {
+        this.x = x;
+        this.y = y;
+        this.dx = 0.1;
+        this.radius = rad;
+
+        this.draw = () => {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = 'yellowgreen';
+          ctx.fill();
+        };
+
+        this.update = () => {
+          this.x -= this.dx;
+
+          const yDiff = this.radius / Math.cos(ground.angle().y);
+          const moveAngle = 1 + ground.angle().y / 10;
+          const reverseAngle = 1 + (ground.angle().y / 10) * ground.angle().x;
+
+          if (this.y < h - this.radius) {
+            this.dx *= moveAngle * 1.01;
+            this.y = ground.getHeight(w - this.x) - yDiff;
+          } else {
+            this.dx /= reverseAngle * 1.03;
+            this.y = h - this.radius;
+          }
+
+          if (this.dx < 0.1) {
+            // groundMove = false;
+          }
+
+          this.draw();
+        };
+      }
+
+      // main objects
+      const ground = new Ground(500, 100);
+      const ball = new Ball(w - 30, h - 100, 30);
+
+      // animating
+      function animate() {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, w, h);
+
+        ground.update();
+        ball.update();
+      }
+      animate();
+    </script>
+  </body>
+</html>
