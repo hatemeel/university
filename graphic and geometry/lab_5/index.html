@@ -116,6 +116,14 @@
       const headColor = '#6B5B95';
       const foodColor = '#FF6F61';
 
+      const apple = new Image();
+      const appleSrc = './media/apple.png';
+      apple.src = appleSrc;
+
+      const rock = new Image();
+      const rockSrc = './media/rock.png';
+      rock.src = rockSrc;
+
       // GENERAL SNAKE CLASS
       class Snake {
         active = false;
@@ -125,6 +133,11 @@
         score = 0;
         blocks = [new Block()];
         food = new Food(this.blocks);
+        rock = new Rock();
+
+        rockLife = setInterval(() => {
+          this.rock.active = !this.rock.active;
+        }, 1111);
 
         // SET PLAYER SCORE
         setScore() {
@@ -165,8 +178,18 @@
           });
         }
 
+        // CHECK FOR ROCK COLLISION
+        checkForRock() {
+          this.blocks.map((b, i) => {
+            if (this.rock.posX === b.posX && this.rock.posY === b.posY) {
+              this.fault();
+            }
+          });
+        }
+
         // END OF GAME (CALL IF FAULT)
         fault() {
+          clearInterval(this.rockLife);
           toggleSnake();
           ctx.clearRect(0, 0, w, h);
           this.score = 0;
@@ -174,6 +197,7 @@
           this.setScore();
           this.blocks = [new Block()];
           this.food = new Food(this.blocks);
+          this.rock = new Rock();
           this.tmpDir = 'right';
           this.direction = 'right';
         }
@@ -187,6 +211,7 @@
             block.draw();
           });
           this.food.draw();
+          this.rock.update();
         }
 
         // SNAKE MOVE LOGIC
@@ -220,6 +245,7 @@
 
           this.blocks.pop();
           this.checkForSelf();
+          this.checkForRock();
           this.checkForFood();
           this.draw();
         }
@@ -295,24 +321,48 @@
 
         // DRAW FOOD ELEMENT
         draw() {
-          ctx.fillStyle = foodColor;
-          ctx.beginPath();
-          ctx.arc(
-            this.posX + BLOCK_SIZE / 2,
-            this.posY + BLOCK_SIZE / 2,
-            BLOCK_SIZE / 2,
-            0,
-            Math.PI * 2
-          );
-          ctx.closePath();
-          ctx.fill();
+          ctx.drawImage(apple, this.posX, this.posY, BLOCK_SIZE, BLOCK_SIZE);
+        }
+      }
+
+      // GENERAL ROCK CLASS
+      class Rock {
+        active = true;
+        posX =
+          Math.round(Math.random() * ((w - BLOCK_SIZE) / BLOCK_SIZE)) *
+          BLOCK_SIZE;
+        posY = -BLOCK_SIZE * 2;
+
+        // DRAW ROCK ELEMENT
+        draw() {
+          ctx.drawImage(rock, this.posX, this.posY, BLOCK_SIZE, BLOCK_SIZE);
+        }
+
+        // UPDATE ROCK COORDINATES
+        async update() {
+          if (this.posY <= h) {
+            this.posY += BLOCK_SIZE;
+            this.draw();
+          } else if (this.active) {
+            this.posX =
+              Math.round(Math.random() * ((w - BLOCK_SIZE) / BLOCK_SIZE)) *
+              BLOCK_SIZE;
+            this.posY = -BLOCK_SIZE * 2;
+          }
         }
       }
 
       const snake = new Snake();
 
       // START OR PAUSE GAME
-      function toggleSnake() {
+      async function toggleSnake(fault = false) {
+        await apple.onload;
+        await rock.onload;
+
+        if (snake.active && fault) {
+          snake.fault();
+          return;
+        }
         snake.active = !snake.active;
         document.querySelector('.canvas-wrap').classList.toggle('pause');
       }
@@ -350,7 +400,7 @@
 
         // START OR STOP GAME IF "Space" PRESSED
         if (event.code === 'Space') {
-          toggleSnake();
+          toggleSnake(true);
         }
       };
     </script>
