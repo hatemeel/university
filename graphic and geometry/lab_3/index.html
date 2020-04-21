@@ -54,7 +54,7 @@
       <div class="controls d-flex align-items-center mb-1">
         <input type="file" id="file" onchange="loadImage(event)" />
         <div class="mx-5"></div>
-        <button onclick="removeRed()">Remove Red</button>
+        <button onclick="removeRed()">Remove Red & Cut Center</button>
         <div class="mx-5"></div>
         <label>Selection Width</label>
         <input type="number" id="sWidth" value="10" class="ml-2" />
@@ -106,7 +106,7 @@
 
           // LOAD SAME IMAGE TO VIRTUAL CANVAS
           vCtx.drawImage(image, 0, 0, size.width, size.height);
-          const imgData = vCtx.getImageData(0, 0, vCanv.width, vCanv.height);
+          let imgData = vCtx.getImageData(0, 0, vCanv.width, vCanv.height);
 
           // image data manipulation
 
@@ -116,6 +116,9 @@
               imgData.data[i] = 0;
             }
           });
+
+          // CUT CENTER BLOCK PIXELS
+          imgData = cutCenter(vCtx, imgData);
 
           // =======================
 
@@ -133,6 +136,41 @@
           clearCanvas();
           fitImageOn(canvas, image);
         }
+      }
+
+      // CHANGE CENTER BLOCK PIXELS TO TRANSPARENT
+      function cutCenter(context, imgData) {
+        const offsetX = Math.round(imgData.width / 3);
+        const offsetY = Math.round(imgData.height / 3);
+
+        let pixels = groupPixels(imgData.data);
+        let row = 0;
+        const out = [];
+
+        // SET EACH PIXEL THAT BELONGS TO CENTER PART TO TRANSPARENT
+        pixels.map((x, i) => {
+          if (i % imgData.width === 0) {
+            row++;
+          }
+
+          if (
+            i < imgData.width * row - offsetX &&
+            i > imgData.width * row + offsetX - imgData.width &&
+            row > offsetY &&
+            row < imgData.height - offsetY
+          ) {
+            out.push([0, 0, 0, 0]);
+          } else {
+            out.push(x);
+          }
+        });
+
+        pixels = out.flat(Infinity);
+        pixels.map((x, i) => {
+          imgData.data[i] = x;
+        });
+
+        return imgData;
       }
 
       async function selectBorders() {
@@ -154,10 +192,9 @@
           // image data manipulation
 
           // ALL PIXEL DATA GROUP TO ARRAYS OF DATA OF EACH PIXEL
-          let pixels = groupPixesls(imgData.data);
+          let pixels = groupPixels(imgData.data);
 
           let row = 0;
-          let selection = false;
           const sWidth = document.querySelector('#sWidth').value * 1;
           const out = [];
 
@@ -248,7 +285,7 @@
       }
 
       // GROUP PIXEL DATA FUNCTION
-      function groupPixesls(data) {
+      function groupPixels(data) {
         const grouped = [];
         data = [...data];
         data.push(0);
