@@ -138,6 +138,9 @@
         // ball mass
         mass = nodes.weightVal.value;
 
+        // tracers list
+        tracers = [];
+
         update() {
           // ball position
           this.posX = origin.x + Math.sin(this.ang) * this.length;
@@ -153,11 +156,41 @@
           this.vel *= 0.99;
           this.ang += this.vel;
 
+          // add tracer for current ball position
+          this.tracers.unshift({
+            x: { ...this }.posX,
+            y: { ...this }.posY,
+          });
+
+          // remove last tracer if there are more than 10 tracers
+          if (this.tracers.length > 10) {
+            this.tracers.pop();
+          }
+
+          // console.log(this.tracers);
+
           this.draw();
         }
 
         // draw all elements
         draw() {
+          // draw each tracer before drawing other elements
+          this.tracers.map((t, i) => {
+            ctx.beginPath();
+            ctx.arc(
+              t.x,
+              t.y,
+              // ball radius depends on it's weight
+              Math.max(10, this.mass * 1.5),
+              0,
+              Math.PI * 2
+            );
+            ctx.closePath();
+            // make each tracer more transparent then previous one
+            ctx.fillStyle = `#cccccc${100 / i}`;
+            ctx.fill();
+          });
+
           ctx.beginPath();
           ctx.moveTo(origin.x, origin.y);
           ctx.lineTo(this.posX, this.posY);
