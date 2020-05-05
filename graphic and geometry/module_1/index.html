@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <title>Ticker</title>
+
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100vh;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .container {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <canvas></canvas>
+    </div>
+
+    <div class="handlers">
+      <div class="form-group">
+        <label>Start Angel: <strong id="angle"></strong></label>
+        <input
+          type="range"
+          class="custom-range"
+          min="-90"
+          max="90"
+          id="angleVal"
+          value="30"
+          oninput="display()"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Bob Weight: <strong id="weight"></strong></label>
+        <input
+          type="range"
+          class="custom-range"
+          min="1"
+          max="100"
+          id="weightVal"
+          value="20"
+          oninput="display()"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Arm Length: <strong id="length"></strong></label>
+        <input
+          type="range"
+          class="custom-range"
+          min="20"
+          max="500"
+          id="lengthVal"
+          value="280"
+          oninput="display()"
+        />
+      </div>
+
+      <div class="form-group">
+        <button type="button" class="btn btn-primary" onclick="start()">
+          Simulate
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+
+      const w = document.querySelector('.container').offsetWidth;
+      const h = document.querySelector('.container').offsetHeight;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      // show element and value input nodes
+      const nodes = {
+        angleShow: document.querySelector('#angle'),
+        weightShow: document.querySelector('#weight'),
+        lengthShow: document.querySelector('#length'),
+        angleVal: document.querySelector('#angleVal'),
+        weightVal: document.querySelector('#weightVal'),
+        lengthVal: document.querySelector('#lengthVal'),
+      };
+
+      // ====
+
+      // pendulum top point coordinates
+      const origin = {
+        x: w / 2,
+        y: 75,
+      };
+
+      // pendulum general class
+      class Pendulum {
+        // arm angel
+        ang = (Math.PI / 180) * nodes.angleVal.value;
+
+        // arm length
+        length = nodes.lengthVal.value;
+
+        // accelerate
+        acc = 0;
+
+        // velocity
+        vel = 0;
+
+        // gravity imitation
+        gravity = 0.8;
+
+        // ball mass
+        mass = nodes.weightVal.value;
+
+        update() {
+          // ball position
+          this.posX = origin.x + Math.sin(this.ang) * this.length;
+          this.posY = origin.y + Math.cos(this.ang) * this.length;
+
+          // calculate acceleration by length, mass and gravity
+          this.acc =
+            ((this.gravity / this.length) * Math.sin(-this.ang)) /
+            (Math.pow(this.mass, 0.5) * this.gravity);
+
+          // change angel and velocity
+          this.vel += this.acc;
+          this.vel *= 0.99;
+          this.ang += this.vel;
+
+          this.draw();
+        }
+
+        // draw all elements
+        draw() {
+          ctx.beginPath();
+          ctx.moveTo(origin.x, origin.y);
+          ctx.lineTo(this.posX, this.posY);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(origin.x, origin.y, 5, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.fillStyle = '#000000';
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(
+            this.posX,
+            this.posY,
+            // ball radius depends on it's weight
+            Math.max(10, this.mass * 1.5),
+            0,
+            Math.PI * 2
+          );
+          ctx.closePath();
+          ctx.fillStyle = '#ccc';
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
+      // create new pendulum from general class
+      let pendulum = new Pendulum();
+
+      // main animation function
+      function animate() {
+        ctx.clearRect(0, 0, w, h);
+        requestAnimationFrame(animate);
+        pendulum.update();
+      }
+      animate();
+
+      // start new pendulum simulation
+      function start() {
+        pendulum = new Pendulum();
+      }
+
+      // display all dynamic params
+      function display() {
+        Object.keys(nodes).map((elem) => {
+          elem = elem.replace(/Show|Val/, '');
+
+          nodes[`${elem}Show`].innerHTML = nodes[`${elem}Val`].value;
+        });
+      }
+      display();
+    </script>
+  </body>
+</html>

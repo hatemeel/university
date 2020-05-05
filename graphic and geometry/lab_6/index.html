@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      @import url(https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css);
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100vh;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      button {
+        padding: 0 5px;
+      }
+
+      label {
+        margin: 0;
+      }
+
+      canvas {
+        border: 1px solid black;
+      }
+
+      .container-fluid {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .canvas-container {
+        flex: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="canvas-container">
+        <canvas></canvas>
+      </div>
+    </div>
+
+    <script>
+      const container = document.querySelector('.canvas-container');
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      CanvasRenderingContext2D.prototype.clear = function () {
+        this.getContext('2d').clearRect(0, 0, this.w, this.h);
+      };
+
+      let w = container.offsetWidth;
+      let h = container.offsetHeight;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      class Polygon {
+        posX = 0;
+        posY = 0;
+        radius = 0;
+        sidesCount = 5;
+        sides = [];
+        tops = [];
+
+        constructor() {
+          this.radius = Math.round(Math.random() * 100 + 100);
+          this.posX = Math.round(
+            Math.random() * (w - this.radius * 2) + this.radius
+          );
+          this.posY = Math.round(
+            Math.random() * (h - this.radius * 2) + this.radius
+          );
+
+          this.generateSides();
+          this.draw();
+
+          console.log(this.tops);
+          console.log(this.sides);
+        }
+
+        generateSides() {
+          const startX = this.posX + this.radius * Math.cos(0);
+          const startY = this.posY + this.radius * Math.sin(0);
+          this.tops.push({ x: startX, y: startY });
+
+          for (let i = 1; i <= this.sidesCount; i++) {
+            const tmpX =
+              this.posX +
+              this.radius * Math.cos((i * 2 * Math.PI) / this.sidesCount);
+            const tmpY =
+              this.posY +
+              this.radius * Math.sin((i * 2 * Math.PI) / this.sidesCount);
+            this.tops.push({ x: tmpX, y: tmpY });
+            this.sides.push([this.tops[i - 1], { x: tmpX, y: tmpY }]);
+          }
+        }
+
+        draw() {
+          ctx.beginPath();
+          this.tops.forEach((t, i) => {
+            if (i === 0) {
+              ctx.moveTo(t.x, t.y);
+            } else {
+              ctx.lineTo(t.x, t.y);
+            }
+          });
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+
+      class Circle {
+        posX = 0;
+        posY = 0;
+        radius = 0;
+
+        constructor() {
+          this.radius = Math.round(Math.random() * 100 + 100);
+          this.posX = Math.round(
+            Math.random() * (w - this.radius * 2) + this.radius
+          );
+          this.posY = Math.round(
+            Math.random() * (h - this.radius * 2) + this.radius
+          );
+
+          this.draw();
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.posX, this.posY, this.radius, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+
+      let polygon = new Polygon();
+      let circle = new Circle();
+
+      window.onclick = () => {
+        polygon = new Polygon();
+        circle = new Circle();
+      };
+    </script>
+  </body>
+</html>
