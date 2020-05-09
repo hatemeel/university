@@ -19,6 +19,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        user-select: none;
       }
 
       button {
@@ -31,6 +32,8 @@
 
       canvas {
         border: 1px solid black;
+
+        cursor: all-scroll;
       }
 
       .container-fluid {
@@ -50,6 +53,14 @@
   </head>
   <body>
     <div class="container-fluid">
+      Available events:
+      <span><code>Move Mouse</code> to control circle position</span>
+      <span><code>Mouse Wheel</code> to control circle radius</span>
+      <span><code>Left Click</code> to generate new polygon</span>
+      <span class="text-muted small"
+        >// circle will be red if collision heppened</span
+      >
+      <br />
       <div class="canvas-container">
         <canvas></canvas>
       </div>
@@ -60,7 +71,7 @@
       const canvas = document.querySelector('canvas');
       const ctx = canvas.getContext('2d');
       CanvasRenderingContext2D.prototype.clear = function () {
-        this.getContext('2d').clearRect(0, 0, this.w, this.h);
+        this.clearRect(0, 0, this.canvas.width, this.canvas.height);
       };
 
       let w = container.offsetWidth;
@@ -69,6 +80,7 @@
       canvas.width = w;
       canvas.height = h;
 
+      // global polygon class
       class Polygon {
         posX = 0;
         posY = 0;
@@ -88,28 +100,33 @@
 
           this.generateSides();
           this.draw();
-
-          console.log(this.tops);
-          console.log(this.sides);
         }
 
+        // calculate polygon tops and sides
         generateSides() {
+          // polygon start point
           const startX = this.posX + this.radius * Math.cos(0);
           const startY = this.posY + this.radius * Math.sin(0);
+
           this.tops.push({ x: startX, y: startY });
 
           for (let i = 1; i <= this.sidesCount; i++) {
+            // top point X
             const tmpX =
               this.posX +
               this.radius * Math.cos((i * 2 * Math.PI) / this.sidesCount);
+
+            // top point Y
             const tmpY =
               this.posY +
               this.radius * Math.sin((i * 2 * Math.PI) / this.sidesCount);
+
             this.tops.push({ x: tmpX, y: tmpY });
             this.sides.push([this.tops[i - 1], { x: tmpX, y: tmpY }]);
           }
         }
 
+        // draw polygon sides
         draw() {
           ctx.beginPath();
           this.tops.forEach((t, i) => {
@@ -121,41 +138,168 @@
           });
           ctx.closePath();
           ctx.stroke();
+          ctx.fillStyle = '#ccc';
+          ctx.fill();
         }
       }
 
+      // global circle class
       class Circle {
         posX = 0;
         posY = 0;
-        radius = 0;
+        radius = 100;
 
-        constructor() {
-          this.radius = Math.round(Math.random() * 100 + 100);
-          this.posX = Math.round(
-            Math.random() * (w - this.radius * 2) + this.radius
-          );
-          this.posY = Math.round(
-            Math.random() * (h - this.radius * 2) + this.radius
-          );
+        constructor(x, y, polygon) {
+          // polygon params
+          this.polygon = polygon;
+
+          this.posX =
+            x ||
+            Math.round(Math.random() * (w - this.radius * 2) + this.radius);
+          this.posY =
+            y ||
+            Math.round(Math.random() * (h - this.radius * 2) + this.radius);
 
           this.draw();
         }
 
+        // draw circle
+        // red if collision
         draw() {
+          this.polygonSides = this.polygon.sides;
+          this.polygonTops = this.polygon.tops;
+
           ctx.beginPath();
           ctx.arc(this.posX, this.posY, this.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = this.checkColission() ? 'red' : 'black';
           ctx.closePath();
           ctx.stroke();
+          ctx.strokeStyle = 'black';
+        }
+
+        // check for circle collision
+        checkColission() {
+          let collision = false;
+
+          const polygonCenter = point(this.polygon.posX, this.polygon.posY);
+          const circleCenter = point(this.posX, this.posY);
+
+          // check collision for each polygon side
+          this.polygonSides.map((side) => {
+            const circle = {
+              radius: this.radius,
+              center: point(this.posX, this.posY),
+            };
+
+            const line = {
+              p1: point(side[0].x, side[0].y),
+              p2: point(side[1].x, side[1].y),
+            };
+
+            const collisionPoints = getCollisionPoints(circle, line);
+
+            if (collisionPoints.length) {
+              collision = true;
+
+              // draw collision point
+              collisionPoints.map((p) => {
+                ctx.moveTo(p.x, p.y);
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+              });
+            }
+          });
+
+          // check if circle is inside the polygon
+          if (getLength(polygonCenter, circleCenter) <= this.radius) {
+            return true;
+          }
+
+          return collision;
         }
       }
 
       let polygon = new Polygon();
-      let circle = new Circle();
+      let circle = new Circle(null, null, polygon);
 
-      window.onclick = () => {
+      // click to generate new polygon
+      canvas.onclick = () => {
+        ctx.clear();
         polygon = new Polygon();
-        circle = new Circle();
+        circle.polygon = polygon;
+        circle.draw();
       };
+
+      // circle move with cursor
+      canvas.onmousemove = (event) => {
+        ctx.clear();
+        polygon.draw();
+        circle.posX = event.x - canvas.offsetLeft;
+        circle.posY = event.y - canvas.offsetTop;
+        circle.polygon = polygon;
+        circle.draw();
+      };
+
+      // use mouse wheel to control circle radius
+      canvas.onmousewheel = (event) => {
+        event.wheelDelta > 0
+          ? (circle.radius += 10)
+          : circle.radius > 20
+          ? (circle.radius -= 10)
+          : (circle.radius -= 0);
+        ctx.clear();
+        polygon.draw();
+        circle.draw();
+      };
+
+      // calculate vector length between 2 points
+      function getLength(a, b) {
+        return Math.pow(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2), 0.5);
+      }
+
+      // return point object
+      function point(x, y) {
+        return { x, y };
+      }
+
+      // calculate collision points with coordinates
+      function getCollisionPoints(circle, line) {
+        let a, b, c, d, u1, u2, ret, retP1, retP2, v1, v2;
+        v1 = {};
+        v2 = {};
+        v1.x = line.p2.x - line.p1.x;
+        v1.y = line.p2.y - line.p1.y;
+        v2.x = line.p1.x - circle.center.x;
+        v2.y = line.p1.y - circle.center.y;
+        b = v1.x * v2.x + v1.y * v2.y;
+        c = 2 * (v1.x * v1.x + v1.y * v1.y);
+        b *= -2;
+        d = Math.sqrt(
+          b * b -
+            2 * c * (v2.x * v2.x + v2.y * v2.y - circle.radius * circle.radius)
+        );
+        if (isNaN(d)) {
+          // no collision
+          return [];
+        }
+        u1 = (b - d) / c; // these represent the unit distance of point one and two on the line
+        u2 = (b + d) / c;
+        retP1 = {}; // return points
+        retP2 = {};
+        ret = []; // return array
+        if (u1 <= 1 && u1 >= 0) {
+          // add point if on the line segment
+          retP1.x = line.p1.x + v1.x * u1;
+          retP1.y = line.p1.y + v1.y * u1;
+          ret[0] = retP1;
+        }
+        if (u2 <= 1 && u2 >= 0) {
+          // second add point if on the line segment
+          retP2.x = line.p1.x + v1.x * u2;
+          retP2.y = line.p1.y + v1.y * u2;
+          ret[ret.length] = retP2;
+        }
+        return ret;
+      }
     </script>
   </body>
 </html>
