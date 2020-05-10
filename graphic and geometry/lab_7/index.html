@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+    <title>Document</title>
+    <style>
+      @import url(https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css);
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100vh;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+      }
+
+      button {
+        padding: 0 5px;
+      }
+
+      label {
+        margin: 0;
+      }
+
+      canvas {
+        border: 1px solid black;
+      }
+
+      canvas.cut {
+        cursor: crosshair;
+      }
+
+      .container-fluid {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .canvas-container {
+        flex: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .mode-handler {
+        border-width: 3px;
+        width: 150px;
+      }
+
+      .mode-handler.active {
+        border-color: var(--success) !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div class="canvas-container">
+        <canvas
+          onmousedown="startFigure(event)"
+          onmousemove="drawFigure(event)"
+          onmouseup="endFigure(event)"
+        ></canvas>
+      </div>
+
+      <div class="handlers mt-2 d-flex align-items-center">
+        <div
+          onclick="toggleMode('line', event)"
+          class="btn btn-secondary mode-handler mr-3 active"
+        >
+          Line
+        </div>
+        <div
+          onclick="toggleMode('cut', event)"
+          class="btn btn-secondary mode-handler mr-3"
+        >
+          Cut
+        </div>
+        <div
+          onclick="drawManual(event)"
+          class="btn btn-secondary mode-handler mr-3"
+        >
+          Manual
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const container = document.querySelector('.canvas-container');
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      CanvasRenderingContext2D.prototype.clear = function () {
+        this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      };
+
+      let w = container.offsetWidth;
+      let h = container.offsetHeight;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      // global drawer class
+      class Drawer {
+        animate = true;
+        mode = 'line';
+        active = false;
+        collisionPoints = [];
+        allPoints = [];
+
+        // line and rectangle
+        constructor(...figures) {
+          this.figures = figures;
+        }
+
+        // draw figures and cutted segment of line if exists
+        draw() {
+          // line and rectangle collision points
+          this.collisionPoints = [];
+
+          // check collision points for each rect side
+          this.figures[1].lines.map((line) => {
+            const res = linesCollision(this.figures[0].line, line);
+
+            if (res.onLine2) {
+              this.collisionPoints.push(res);
+            }
+          });
+
+          // draw line and rect
+          this.figures.forEach((element) => {
+            element.draw();
+          });
+
+          // check for line & rect collision points
+          if (this.collisionPoints.length === 2) {
+            let startPoint;
+            let endPoint;
+
+            // array of line and collision points
+            this.allPoints = []
+              .concat(this.collisionPoints)
+              .concat([this.figures[0].line.p1, this.figures[0].line.p2])
+              .sort((a, b) => a.x - b.x);
+
+            // check if line and rect don't intercept at all
+            if (
+              (this.allPoints[0].onLine2 && this.allPoints[1].onLine2) ||
+              (!this.allPoints[0].onLine2 && !this.allPoints[1].onLine2)
+            ) {
+              return;
+            }
+
+            startPoint = this.allPoints[1];
+            endPoint = this.allPoints[2];
+
+            // here draw collision line
+            ctx.beginPath();
+            ctx.moveTo(startPoint.x, startPoint.y);
+            ctx.lineTo(endPoint.x, endPoint.y);
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+            ctx.closePath();
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'black';
+          }
+        }
+      }
+
+      // global line class
+      class Line {
+        x1;
+        y1;
+        x2;
+        y2;
+
+        line;
+
+        // set empty points
+        refresh() {
+          this.x1 = undefined;
+          this.y1 = undefined;
+          this.x2 = undefined;
+          this.y2 = undefined;
+        }
+
+        // set line points with updated coordinates
+        update() {
+          this.line = {
+            p1: { x: this.x1, y: this.y1 },
+            p2: { x: this.x2, y: this.y2 },
+          };
+        }
+
+        // draw line
+        draw() {
+          this.update();
+          ctx.beginPath();
+          ctx.moveTo(this.x1, this.y1);
+          ctx.lineTo(this.x2, this.y2);
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = 'black';
+          ctx.closePath();
+          ctx.stroke();
+          ctx.lineWidth = 1;
+        }
+      }
+
+      // global cutter class
+      class Cutter {
+        x1;
+        y1;
+        x2;
+        y2;
+
+        lines = [];
+
+        // set empty points
+        refresh() {
+          this.x1 = undefined;
+          this.y1 = undefined;
+          this.x2 = undefined;
+          this.y2 = undefined;
+        }
+
+        // set cutter sides with updated coordinates
+        update() {
+          this.lines[0] = {
+            p1: { x: this.x1, y: this.y1 },
+            p2: { x: this.x2, y: this.y1 },
+          };
+          this.lines[1] = {
+            p1: { x: this.x2, y: this.y1 },
+            p2: { x: this.x2, y: this.y2 },
+          };
+          this.lines[2] = {
+            p1: { x: this.x1, y: this.y2 },
+            p2: { x: this.x2, y: this.y2 },
+          };
+          this.lines[3] = {
+            p1: { x: this.x1, y: this.y1 },
+            p2: { x: this.x1, y: this.y2 },
+          };
+        }
+
+        // draw rectangle
+        draw() {
+          this.update();
+          ctx.beginPath();
+          ctx.moveTo(this.x1, this.y1);
+          ctx.rect(this.x1, this.y1, this.x2 - this.x1, this.y2 - this.y1);
+          ctx.strokeStyle = 'green';
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+
+      const line = new Line();
+      const cutter = new Cutter();
+      const drawer = new Drawer(line, cutter);
+
+      // main animation function
+      function animate() {
+        if (drawer.animate) {
+          ctx.clear();
+          requestAnimationFrame(animate);
+          drawer.draw();
+        }
+      }
+      animate();
+
+      // change draw mode
+      function toggleMode(value, event) {
+        drawer.mode = value;
+
+        if (value !== 'manual' && !drawer.animate) {
+          drawer.animate = true;
+          animate();
+        } else if (value === 'manual') {
+          drawer.animate = false;
+        }
+
+        if (value === 'cut') {
+          canvas.classList.add('cut');
+        } else {
+          canvas.classList.remove('cut');
+        }
+
+        document.querySelectorAll('.mode-handler').forEach((el) => {
+          el.classList.remove('active');
+        });
+
+        event.target.classList.add('active');
+      }
+
+      // on mouse down start draw figure
+      function startFigure(event) {
+        drawer.active = true;
+
+        if (drawer.mode === 'line') {
+          line.refresh();
+          line.x1 = event.x - canvas.offsetLeft;
+          line.y1 = event.y - canvas.offsetTop;
+        } else if (drawer.mode === 'cut') {
+          cutter.refresh();
+          cutter.x1 = event.x - canvas.offsetLeft;
+          cutter.y1 = event.y - canvas.offsetTop;
+        }
+      }
+
+      // on mouse move draw figure
+      function drawFigure(event) {
+        if (drawer.active) {
+          if (drawer.mode === 'line') {
+            line.x2 = event.x - canvas.offsetLeft;
+            line.y2 = event.y - canvas.offsetTop;
+          } else if (drawer.mode === 'cut') {
+            cutter.x2 = event.x - canvas.offsetLeft;
+            cutter.y2 = event.y - canvas.offsetTop;
+          }
+        }
+      }
+
+      // on mouse up finish figure drawing
+      function endFigure(event) {
+        drawer.active = false;
+      }
+
+      // format lines data and check for collision
+      function linesCollision(line1, line2) {
+        return checkLineIntersection(
+          line1.p1.x,
+          line1.p1.y,
+          line1.p2.x,
+          line1.p2.y,
+          line2.p1.x,
+          line2.p1.y,
+          line2.p2.x,
+          line2.p2.y
+        );
+      }
+
+      // check for lines collision and return collision points
+      function checkLineIntersection(
+        line1StartX,
+        line1StartY,
+        line1EndX,
+        line1EndY,
+        line2StartX,
+        line2StartY,
+        line2EndX,
+        line2EndY
+      ) {
+        // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+        var denominator,
+          a,
+          b,
+          numerator1,
+          numerator2,
+          result = {
+            x: null,
+            y: null,
+            onLine1: false,
+            onLine2: false,
+          };
+        denominator =
+          (line2EndY - line2StartY) * (line1EndX - line1StartX) -
+          (line2EndX - line2StartX) * (line1EndY - line1StartY);
+        if (denominator == 0) {
+          return result;
+        }
+        a = line1StartY - line2StartY;
+        b = line1StartX - line2StartX;
+        numerator1 =
+          (line2EndX - line2StartX) * a - (line2EndY - line2StartY) * b;
+        numerator2 =
+          (line1EndX - line1StartX) * a - (line1EndY - line1StartY) * b;
+        a = numerator1 / denominator;
+        b = numerator2 / denominator;
+
+        // if we cast these lines infinitely in both directions, they intersect here:
+        result.x = line1StartX + a * (line1EndX - line1StartX);
+        result.y = line1StartY + a * (line1EndY - line1StartY);
+        // if line1 is a segment and line2 is infinite, they intersect if:
+        if (a > 0 && a < 1) {
+          result.onLine1 = true;
+        }
+        // if line2 is a segment and line1 is infinite, they intersect if:
+        if (b > 0 && b < 1) {
+          result.onLine2 = true;
+        }
+        // if line1 and line2 are segments, they intersect if both of the above are true
+        return result;
+      }
+
+      // format point
+      function point(x, y) {
+        return { x, y };
+      }
+
+      // draw manual calculation
+      function drawManual(event) {
+        toggleMode('manual', event);
+        ctx.clear();
+
+        const pointGroups = [
+          // line points
+          {
+            color: 'black',
+            width: 2,
+            points: [
+              {
+                x: 272,
+                y: 217,
+              },
+              {
+                x: 707,
+                y: 544,
+              },
+            ],
+          },
+          // cutter rectangle points
+          {
+            color: 'green',
+            points: [
+              {
+                x: 241,
+                y: 263,
+              },
+              {
+                x: 733,
+                y: 263,
+              },
+              {
+                x: 733,
+                y: 483,
+              },
+              {
+                x: 241,
+                y: 483,
+              },
+            ],
+          },
+          // collision line points are calculated manualy
+          {
+            color: 'red',
+            width: 2,
+            points: [
+              {
+                x: 625.655,
+                y: 482.851,
+              },
+              {
+                x: 333.335,
+                y: 263.107,
+              },
+            ],
+          },
+        ];
+
+        // draw figures by points
+        pointGroups.map((pg) => {
+          ctx.beginPath();
+
+          ctx.moveTo(pg.points[0].x, pg.points[0].y);
+
+          pg.points.map((p, i) => {
+            if (i) {
+              ctx.lineTo(p.x, p.y);
+            }
+          });
+
+          ctx.strokeStyle = pg.color;
+          ctx.lineWidth = pg.width || 1;
+          ctx.closePath();
+          ctx.stroke();
+        });
+
+        ctx.strokeStyle = 'black';
+      }
+    </script>
+  </body>
+</html>
