@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+      }
+
+      .container-fluid {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        padding-right: 0;
+      }
+
+      .work-area {
+        display: flex;
+        flex: auto;
+        height: 100%;
+        padding: 15px;
+        padding-bottom: 0;
+      }
+
+      .canvas-container {
+        flex: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 1px solid black;
+      }
+
+      .mode-handlers {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .mode-handlers .btn {
+        margin-top: 15px;
+      }
+
+      .mode-handler {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+      }
+
+      .mode-handler i {
+        pointer-events: none;
+      }
+
+      .mode-handler.active {
+        color: #2de657 !important;
+      }
+
+      .line-icon {
+        transform: rotate(135deg) scaleX(2);
+      }
+
+      .info-panel {
+        display: flex;
+        padding: 5px;
+        padding-right: 15px;
+        align-self: flex-end;
+      }
+
+      .info-panel > div {
+        margin-left: 20px;
+      }
+
+      .bold {
+        font-weight: 600;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div class="mode-handlers">
+        <div
+          class="btn btn-secondary mode-handler active"
+          data-mode="cursor"
+          title="cursor"
+          onclick="toggleMode(event)"
+        >
+          <i class="fas fa-mouse-pointer"></i>
+        </div>
+        <div
+          class="btn btn-secondary mode-handler"
+          data-mode="line"
+          title="line"
+          onclick="toggleMode(event)"
+        >
+          <i class="material-icons line-icon">remove</i>
+        </div>
+
+        <div class="btn btn-danger btn-block mt-auto" onclick="stop()">
+          <i class="fas fa-ban no-events"></i>
+        </div>
+      </div>
+
+      <div class="work-area">
+        <div class="canvas-container">
+          <canvas
+            onmousewheel="scrollCanvas(event); zoomCanvas(event)"
+            onmousedown="startFigure(event)"
+            onmousemove="drawFigure(event); showMousePos(event)"
+            onmouseup="finishFigure(event)"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-mode">
+        Mode: <span class="text-primary bold">Cursor</span>
+      </div>
+      <div class="info-zoom">
+        Zoom: <span class="text-primary bold">x1.0</span>
+      </div>
+    </div>
+
+    <script>
+      const container = document.querySelector('.canvas-container');
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      CanvasRenderingContext2D.prototype.clear = function () {
+        this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      };
+      CanvasRenderingContext2D.prototype.refresh = function () {
+        this.strokeStyle = 'black';
+        this.fillStyle = 'black';
+        this.textAlign = 'left';
+        this.lineWidth = 1;
+      };
+
+      let w = container.clientWidth;
+      let h = container.clientHeight;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      class Drawer {
+        animate = true;
+
+        // modes [cursor, line, ...]
+        mode = 'move';
+        active = false;
+
+        scale = 1;
+        moveX = 0;
+        moveY = 0;
+        scrollX = -Math.round(w / 2);
+        scrollY = -Math.round(h / 2);
+
+        figures = [];
+
+        constructor(...figures) {
+          this.figures = figures;
+        }
+
+        draw() {
+          const params = {
+            scale: this.scale,
+            moveX: this.moveX,
+            moveY: this.moveY,
+            scrollX: this.scrollX,
+            scrollY: this.scrollY,
+          };
+
+          this.figures.map((fig) => {
+            if (fig.update) {
+              fig.update(params);
+            }
+            fig.draw();
+          });
+        }
+      }
+
+      class Metrix {
+        startX;
+        endX;
+        startY;
+        endY;
+
+        mousePosX;
+        mousePosY;
+
+        scale;
+
+        constructor() {
+          this.update(0, 0);
+        }
+
+        update({ scrollX, scrollY, scale }) {
+          this.scale = scale;
+
+          this.startX = Math.round(scrollX / this.scale);
+          this.endX = w / this.scale + this.startX;
+          this.startY = Math.round(scrollY / this.scale);
+          this.endY = h / this.scale + this.startY;
+        }
+
+        draw() {
+          // lines
+          ctx.beginPath();
+          ctx.moveTo(5, 5);
+          ctx.lineTo(w - 5, 5);
+          ctx.moveTo(5, 5);
+          ctx.lineTo(5, h - 5);
+          ctx.strokeStyle = 'gray';
+          ctx.closePath();
+          ctx.stroke();
+          ctx.refresh();
+
+          // numbers
+          ctx.font = '10px';
+
+          ctx.textAlign = 'center';
+          for (let i = this.startX; i < this.endX; i += 1) {
+            if (i - this.startX > 5 && i % 25 === 0) {
+              ctx.beginPath();
+              ctx.moveTo((i - this.startX) * this.scale, 2);
+              ctx.lineTo((i - this.startX) * this.scale, 8);
+              ctx.closePath();
+              ctx.stroke();
+
+              if (i % 50 === 0 && i - this.startX > 20) {
+                ctx.fillText(i, (i - this.startX) * this.scale, 19);
+              }
+            }
+          }
+
+          ctx.textAlign = 'left';
+          for (let i = this.startY; i < this.endY; i += 1) {
+            if (i - this.startY > 5 && i % 25 === 0) {
+              ctx.beginPath();
+              ctx.moveTo(2, (i - this.startY) * this.scale);
+              ctx.lineTo(8, (i - this.startY) * this.scale);
+              ctx.closePath();
+              ctx.stroke();
+
+              if (i % 50 === 0 && i - this.startY > 20) {
+                ctx.fillText(i, 11, (i - this.startY) * this.scale + 2.5);
+              }
+            }
+          }
+
+          ctx.refresh();
+
+          ctx.strokeStyle = 'red';
+          ctx.beginPath();
+          ctx.moveTo(this.mousePosX, 0);
+          ctx.lineTo(this.mousePosX, 10);
+          ctx.moveTo(0, this.mousePosY);
+          ctx.lineTo(10, this.mousePosY);
+          ctx.closePath();
+          ctx.stroke();
+
+          ctx.refresh();
+        }
+      }
+
+      class Line {
+        x1;
+        x2;
+        y1;
+        y2;
+
+        offsetX;
+        offsetY;
+
+        width;
+
+        scale;
+
+        constructor() {
+          this.width = 2;
+        }
+
+        refresh() {
+          this.x1 = undefined;
+          this.x2 = undefined;
+          this.y1 = undefined;
+          this.y2 = undefined;
+        }
+
+        update({ scrollX, scrollY, scale }) {
+          this.width = 2 * scale;
+          this.scale = scale;
+          this.offsetY = Math.round(scrollY / this.scale);
+          this.offsetX = Math.round(scrollX / this.scale);
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.moveTo(
+            (this.x1 - this.offsetX) * this.scale,
+            (this.y1 - this.offsetY) * this.scale
+          );
+          ctx.lineTo(
+            (this.x2 - this.offsetX) * this.scale,
+            (this.y2 - this.offsetY) * this.scale
+          );
+          ctx.lineWidth = this.width;
+          ctx.closePath();
+          ctx.stroke();
+          ctx.refresh();
+        }
+      }
+
+      const metrix = new Metrix();
+      const line = new Line();
+      const drawer = new Drawer(metrix, line);
+
+      function animate() {
+        if (drawer.animate) {
+          ctx.clear();
+          requestAnimationFrame(animate);
+
+          drawer.draw();
+        }
+      }
+      animate();
+
+      // FIGURE FUNCTIONS ====
+      function startFigure(event) {
+        drawer.active = true;
+
+        if (drawer.mode === 'line') {
+          line.refresh();
+          line.x1 = x(event.x, drawer.scale) + drawer.scrollX;
+          line.y1 = y(event.y, drawer.scale) + drawer.scrollY;
+        }
+      }
+
+      function drawFigure(event) {
+        if (drawer.active) {
+          if (drawer.mode === 'line') {
+            if (drawer.mode === 'line') {
+              line.x2 = x(event.x, drawer.scale) + drawer.scrollX;
+              line.y2 = y(event.y, drawer.scale) + drawer.scrollY;
+            }
+          }
+        }
+      }
+
+      function finishFigure(event) {
+        drawer.active = false;
+      }
+
+      // MAIN FUNCTIONS ====
+      // mode handlers
+      function toggleMode(event) {
+        document.querySelectorAll('.mode-handler').forEach((el) => {
+          el.classList.remove('active');
+        });
+
+        event.target.classList.add('active');
+        drawer.mode = event.target.dataset.mode;
+
+        info('mode', drawer.mode);
+      }
+
+      // SCROLL
+      function scrollCanvas(event) {
+        if (!event.ctrlKey) {
+          if (event.shiftKey) {
+            // scroll x
+
+            if (event.wheelDelta > 0) {
+              drawer.scrollX -= 10;
+            } else {
+              drawer.scrollX += 10;
+            }
+          } else {
+            // scroll y
+
+            if (event.wheelDelta > 0) {
+              drawer.scrollY -= 10;
+            } else {
+              drawer.scrollY += 10;
+            }
+          }
+        }
+      }
+
+      // ZOOM
+      function zoomCanvas(event) {
+        if (event.ctrlKey) {
+          event.preventDefault();
+
+          if (event.wheelDelta > 0) {
+            drawer.scale += 0.1;
+          } else {
+            drawer.scale -= 0.1;
+          }
+
+          info('zoom', `x${drawer.scale.toFixed(1)}`);
+        }
+      }
+
+      function showMousePos(event) {
+        metrix.mousePosX = x(event.x);
+        metrix.mousePosY = y(event.y);
+      }
+
+      // stop animation
+      function stop() {
+        console.log('Animation stoped!');
+        drawer.animate = false;
+      }
+
+      // HELPERS ====
+      function getLength(a, b) {
+        return Math.pow(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2), 0.5);
+      }
+
+      function x(xVal, scale = 1) {
+        return (xVal - canvas.offsetLeft) / scale;
+      }
+
+      function y(yVal, scale = 1) {
+        return (yVal - canvas.offsetTop) / scale;
+      }
+
+      function info(type, text) {
+        document.querySelector(`.info-${type} span`).innerHTML = text;
+      }
+    </script>
+  </body>
+</html>
