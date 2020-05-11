@@ -108,7 +108,7 @@
     <div class="container-fluid">
       <div class="mode-handlers">
         <div
-          class="btn btn-secondary mode-handler active"
+          class="btn btn-secondary mode-handler"
           data-mode="cursor"
           title="cursor"
           onclick="toggleMode(event)"
@@ -116,7 +116,7 @@
           <i class="fas fa-mouse-pointer"></i>
         </div>
         <div
-          class="btn btn-secondary mode-handler"
+          class="btn btn-secondary mode-handler active"
           data-mode="line"
           title="line"
           onclick="toggleMode(event)"
@@ -143,7 +143,7 @@
 
     <div class="info-panel">
       <div class="info-mode">
-        Mode: <span class="text-primary bold">Cursor</span>
+        Mode: <span class="text-primary bold">cursor</span>
       </div>
       <div class="info-zoom">
         Zoom: <span class="text-primary bold">x1.0</span>
@@ -174,7 +174,7 @@
         animate = true;
 
         // modes [cursor, line, ...]
-        mode = 'move';
+        mode = 'line';
         active = false;
 
         scale = 1;
@@ -243,19 +243,27 @@
           ctx.stroke();
           ctx.refresh();
 
+          let scaleCorrection = 50;
+
+          if (this.scale <= 0.3) {
+            scaleCorrection = 500;
+          } else if (this.scale <= 0.5) {
+            scaleCorrection = 100;
+          }
+
           // numbers
           ctx.font = '10px';
 
           ctx.textAlign = 'center';
           for (let i = this.startX; i < this.endX; i += 1) {
-            if (i - this.startX > 5 && i % 25 === 0) {
+            if (i - this.startX > 5 && i % (scaleCorrection / 2) === 0) {
               ctx.beginPath();
               ctx.moveTo((i - this.startX) * this.scale, 2);
               ctx.lineTo((i - this.startX) * this.scale, 8);
               ctx.closePath();
               ctx.stroke();
 
-              if (i % 50 === 0 && i - this.startX > 20) {
+              if (i % scaleCorrection === 0 && i - this.startX > 20) {
                 ctx.fillText(i, (i - this.startX) * this.scale, 19);
               }
             }
@@ -263,14 +271,14 @@
 
           ctx.textAlign = 'left';
           for (let i = this.startY; i < this.endY; i += 1) {
-            if (i - this.startY > 5 && i % 25 === 0) {
+            if (i - this.startY > 5 && i % (scaleCorrection / 2) === 0) {
               ctx.beginPath();
               ctx.moveTo(2, (i - this.startY) * this.scale);
               ctx.lineTo(8, (i - this.startY) * this.scale);
               ctx.closePath();
               ctx.stroke();
 
-              if (i % 50 === 0 && i - this.startY > 20) {
+              if (i % scaleCorrection === 0 && i - this.startY > 20) {
                 ctx.fillText(i, 11, (i - this.startY) * this.scale + 2.5);
               }
             }
@@ -318,8 +326,8 @@
         update({ scrollX, scrollY, scale }) {
           this.width = 2 * scale;
           this.scale = scale;
-          this.offsetY = Math.round(scrollY / this.scale);
           this.offsetX = Math.round(scrollX / this.scale);
+          this.offsetY = Math.round(scrollY / this.scale);
         }
 
         draw() {
@@ -359,8 +367,8 @@
 
         if (drawer.mode === 'line') {
           line.refresh();
-          line.x1 = x(event.x, drawer.scale) + drawer.scrollX;
-          line.y1 = y(event.y, drawer.scale) + drawer.scrollY;
+          line.x1 = (x(event.x) + drawer.scrollX) / drawer.scale;
+          line.y1 = (y(event.y) + drawer.scrollY) / drawer.scale;
         }
       }
 
@@ -368,8 +376,8 @@
         if (drawer.active) {
           if (drawer.mode === 'line') {
             if (drawer.mode === 'line') {
-              line.x2 = x(event.x, drawer.scale) + drawer.scrollX;
-              line.y2 = y(event.y, drawer.scale) + drawer.scrollY;
+              line.x2 = (x(event.x) + drawer.scrollX) / drawer.scale;
+              line.y2 = (y(event.y) + drawer.scrollY) / drawer.scale;
             }
           }
         }
@@ -421,9 +429,15 @@
           event.preventDefault();
 
           if (event.wheelDelta > 0) {
-            drawer.scale += 0.1;
+            if (drawer.scale < 10) {
+              drawer.scale += 0.1;
+              drawer.scale = drawer.scale.toFixed(1) * 1;
+            }
           } else {
-            drawer.scale -= 0.1;
+            if (drawer.scale > 0.1) {
+              drawer.scale -= 0.1;
+              drawer.scale = drawer.scale.toFixed(1) * 1;
+            }
           }
 
           info('zoom', `x${drawer.scale.toFixed(1)}`);
@@ -446,12 +460,12 @@
         return Math.pow(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2), 0.5);
       }
 
-      function x(xVal, scale = 1) {
-        return (xVal - canvas.offsetLeft) / scale;
+      function x(xVal) {
+        return xVal - canvas.offsetLeft;
       }
 
-      function y(yVal, scale = 1) {
-        return (yVal - canvas.offsetTop) / scale;
+      function y(yVal) {
+        return yVal - canvas.offsetTop;
       }
 
       function info(type, text) {
