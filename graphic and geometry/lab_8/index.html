@@ -141,7 +141,14 @@
           <i class="far fa-square"></i>
         </div>
 
-        <div class="btn btn-danger btn-block mt-auto" onclick="stop()">
+        <input
+          type="color"
+          class="btn btn-secondary p-1 mode-handler mt-auto"
+          title="pick color"
+          oninput="setCurrentColor(event)"
+        />
+
+        <div class="btn btn-danger btn-block mt-2" onclick="stop()">
           <i class="fas fa-ban no-events"></i>
         </div>
       </div>
@@ -181,6 +188,7 @@
         this.strokeStyle = 'black';
         this.fillStyle = 'black';
         this.textAlign = 'left';
+        this.textBaseline = 'alphabetic';
         this.lineWidth = 1;
       };
 
@@ -189,6 +197,8 @@
 
       canvas.width = w;
       canvas.height = h;
+
+      let currentColor = '#000000';
 
       class Drawer {
         animate = true;
@@ -204,10 +214,12 @@
         scrollY = -Math.round(h / 2);
 
         figures = [];
+        metrix;
 
         p;
 
-        constructor(...figures) {
+        constructor(metrix, figures = []) {
+          this.metrix = metrix;
           this.figures = figures;
         }
 
@@ -232,16 +244,24 @@
 
           info(
             'scroll',
-            `X:${this.scrollX + Math.round(w / 2)}
-      			Y:${this.scrollY + Math.round(h / 2)}`
+            `X:${(this.scrollX + Math.round(w / 2)).toFixed(1)}
+      			Y:${(this.scrollY + Math.round(h / 2)).toFixed(1)}`
           );
 
-          this.figures.map((fig) => {
-            if (fig.update) {
-              fig.update(params);
-            }
-            fig.draw();
-          });
+          this.figures
+            .sort(
+              (a, b) =>
+                new Date(a.lastUsed).getTime() - new Date(b.lastUsed).getTime()
+            )
+            .map((fig) => {
+              if (fig.update) {
+                fig.update(params);
+              }
+              fig.draw();
+            });
+
+          this.metrix.update(params);
+          this.metrix.draw();
         }
       }
 
@@ -287,6 +307,12 @@
             scaleCorrection = 500;
           } else if (this.scale <= 0.5) {
             scaleCorrection = 100;
+          } else if (this.scale >= 8) {
+            scaleCorrection = 5;
+          } else if (this.scale >= 5) {
+            scaleCorrection = 10;
+          } else if (this.scale >= 2) {
+            scaleCorrection = 25;
           }
 
           // numbers
@@ -308,6 +334,7 @@
           }
 
           ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
           for (let i = this.startY; i < this.endY; i += 1) {
             if (i - this.startY > 5 && i % (scaleCorrection / 2) === 0) {
               ctx.beginPath();
@@ -317,7 +344,7 @@
               ctx.stroke();
 
               if (i % scaleCorrection === 0 && i - this.startY > 20) {
-                ctx.fillText(i, 11, (i - this.startY) * this.scale + 2.5);
+                ctx.fillText(i, 11, (i - this.startY) * this.scale);
               }
             }
           }
@@ -350,6 +377,10 @@
 
         scale;
 
+        lastUsed;
+
+        color;
+
         constructor() {
           this.width = 2;
         }
@@ -379,6 +410,7 @@
             (this.y2 - this.offsetY) * this.scale
           );
           ctx.lineWidth = this.width;
+          ctx.strokeStyle = this.color;
           ctx.closePath();
           ctx.stroke();
           ctx.refresh();
@@ -398,6 +430,10 @@
         width;
 
         scale;
+
+        lastUsed;
+
+        color;
 
         refresh() {
           this.x = undefined;
@@ -429,6 +465,7 @@
             Math.PI * 2
           );
           ctx.lineWidth = this.width;
+          ctx.strokeStyle = this.color;
           ctx.closePath();
           ctx.stroke();
           ctx.refresh();
@@ -450,6 +487,10 @@
         width;
 
         scale;
+
+        lastUsed;
+
+        color;
 
         refresh() {
           this.x1 = undefined;
@@ -484,6 +525,7 @@
             this.sizeY
           );
           ctx.lineWidth = this.width;
+          ctx.strokeStyle = this.color;
           ctx.closePath();
           ctx.stroke();
           ctx.refresh();
@@ -494,8 +536,7 @@
       const line = new Line();
       const circle = new Circle();
       const square = new Square();
-      const drawer = new Drawer(metrix, line, circle, square);
-      // const drawer = new Drawer(metrix, line);
+      const drawer = new Drawer(metrix, [line, circle, square]);
       function animate() {
         if (drawer.animate) {
           ctx.clear();
@@ -514,14 +555,20 @@
           line.refresh();
           line.x1 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
           line.y1 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+          line.lastUsed = new Date();
+          line.color = currentColor;
         } else if (drawer.mode === 'circle') {
           circle.refresh();
           circle.x = (x(event.x) + drawer.p.scrollX) / drawer.scale;
           circle.y = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+          circle.lastUsed = new Date();
+          circle.color = currentColor;
         } else if (drawer.mode === 'square') {
           square.refresh();
           square.x1 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
           square.y1 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+          square.lastUsed = new Date();
+          square.color = currentColor;
         }
       }
 
@@ -560,21 +607,23 @@
       // SCROLL
       function scrollCanvas(event) {
         if (!event.ctrlKey) {
+          let scrollDelta = 5 / (drawer.scale / 2);
+
           if (event.shiftKey) {
             // scroll x
 
             if (event.wheelDelta > 0) {
-              drawer.scrollX -= 10;
+              drawer.scrollX -= scrollDelta;
             } else {
-              drawer.scrollX += 10;
+              drawer.scrollX += scrollDelta;
             }
           } else {
             // scroll y
 
             if (event.wheelDelta > 0) {
-              drawer.scrollY -= 10;
+              drawer.scrollY -= scrollDelta;
             } else {
-              drawer.scrollY += 10;
+              drawer.scrollY += scrollDelta;
             }
           }
         }
@@ -604,6 +653,10 @@
       function showMousePos(event) {
         metrix.mousePosX = x(event.x);
         metrix.mousePosY = y(event.y);
+      }
+
+      function setCurrentColor(event) {
+        currentColor = event.target.value;
       }
 
       // stop animation
