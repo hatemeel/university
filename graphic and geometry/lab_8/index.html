@@ -73,6 +73,7 @@
         justify-content: center;
         width: 50px;
         height: 50px;
+        font-size: 19px;
       }
 
       .mode-handler i {
@@ -84,7 +85,7 @@
       }
 
       .line-icon {
-        transform: rotate(135deg) scaleX(2);
+        transform: rotate(135deg) scaleX(1.5);
       }
 
       .info-panel {
@@ -123,6 +124,22 @@
         >
           <i class="material-icons line-icon">remove</i>
         </div>
+        <div
+          class="btn btn-secondary mode-handler"
+          data-mode="circle"
+          title="circle"
+          onclick="toggleMode(event)"
+        >
+          <i class="far fa-circle"></i>
+        </div>
+        <div
+          class="btn btn-secondary mode-handler"
+          data-mode="square"
+          title="square"
+          onclick="toggleMode(event)"
+        >
+          <i class="far fa-square"></i>
+        </div>
 
         <div class="btn btn-danger btn-block mt-auto" onclick="stop()">
           <i class="fas fa-ban no-events"></i>
@@ -142,8 +159,11 @@
     </div>
 
     <div class="info-panel">
+      <div class="info-scroll">
+        Scroll: <span class="text-primary bold">X:0 Y:0</span>
+      </div>
       <div class="info-mode">
-        Mode: <span class="text-primary bold">cursor</span>
+        Mode: <span class="text-primary bold">line</span>
       </div>
       <div class="info-zoom">
         Zoom: <span class="text-primary bold">x1.0</span>
@@ -185,18 +205,36 @@
 
         figures = [];
 
+        p;
+
         constructor(...figures) {
           this.figures = figures;
         }
 
         draw() {
+          const scaleCorrectionX =
+            (this.scrollX + Math.round(w / 2)) * this.scale -
+            (this.scrollX + Math.round(w / 2));
+
+          const scaleCorrectionY =
+            (this.scrollY + Math.round(h / 2)) * this.scale -
+            (this.scrollY + Math.round(h / 2));
+
           const params = {
             scale: this.scale,
             moveX: this.moveX,
             moveY: this.moveY,
-            scrollX: this.scrollX,
-            scrollY: this.scrollY,
+            scrollX: this.scrollX + scaleCorrectionX,
+            scrollY: this.scrollY + scaleCorrectionY,
           };
+
+          this.p = params;
+
+          info(
+            'scroll',
+            `X:${this.scrollX + Math.round(w / 2)}
+      			Y:${this.scrollY + Math.round(h / 2)}`
+          );
 
           this.figures.map((fig) => {
             if (fig.update) {
@@ -347,10 +385,117 @@
         }
       }
 
+      class Circle {
+        x;
+        y;
+        radiusEndX;
+        radiusEndY;
+        radius;
+
+        offsetX;
+        offsetY;
+
+        width;
+
+        scale;
+
+        refresh() {
+          this.x = undefined;
+          this.y = undefined;
+          this.radiusEndX = undefined;
+          this.radiusEndY = undefined;
+          this.radius = undefined;
+        }
+
+        update({ scrollX, scrollY, scale }) {
+          this.width = 2 * scale;
+          this.scale = scale;
+          this.offsetX = Math.round(scrollX / this.scale);
+          this.offsetY = Math.round(scrollY / this.scale);
+          this.radius =
+            getLength(
+              point(this.x, this.y),
+              point(this.radiusEndX, this.radiusEndY)
+            ) * this.scale;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(
+            (this.x - this.offsetX) * this.scale,
+            (this.y - this.offsetY) * this.scale,
+            this.radius,
+            0,
+            Math.PI * 2
+          );
+          ctx.lineWidth = this.width;
+          ctx.closePath();
+          ctx.stroke();
+          ctx.refresh();
+        }
+      }
+
+      class Square {
+        x1;
+        y1;
+        x2;
+        y2;
+
+        sizeX;
+        sizeY;
+
+        offsetX;
+        offsetY;
+
+        width;
+
+        scale;
+
+        refresh() {
+          this.x1 = undefined;
+          this.y1 = undefined;
+          this.x2 = undefined;
+          this.y2 = undefined;
+          this.sizeX = undefined;
+          this.sizeY = undefined;
+        }
+
+        update({ scrollX, scrollY, scale }) {
+          this.width = 2 * scale;
+          this.scale = scale;
+          this.offsetX = Math.round(scrollX / this.scale);
+          this.offsetY = Math.round(scrollY / this.scale);
+
+          this.sizeX =
+            (this.x2 - this.offsetX) * this.scale -
+            (this.x1 - this.offsetX) * this.scale;
+
+          this.sizeY =
+            (this.y2 - this.offsetY) * this.scale -
+            (this.y1 - this.offsetY) * this.scale;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.rect(
+            (this.x1 - this.offsetX) * this.scale,
+            (this.y1 - this.offsetY) * this.scale,
+            this.sizeX,
+            this.sizeY
+          );
+          ctx.lineWidth = this.width;
+          ctx.closePath();
+          ctx.stroke();
+          ctx.refresh();
+        }
+      }
+
       const metrix = new Metrix();
       const line = new Line();
-      const drawer = new Drawer(metrix, line);
-
+      const circle = new Circle();
+      const square = new Square();
+      const drawer = new Drawer(metrix, line, circle, square);
+      // const drawer = new Drawer(metrix, line);
       function animate() {
         if (drawer.animate) {
           ctx.clear();
@@ -367,18 +512,30 @@
 
         if (drawer.mode === 'line') {
           line.refresh();
-          line.x1 = (x(event.x) + drawer.scrollX) / drawer.scale;
-          line.y1 = (y(event.y) + drawer.scrollY) / drawer.scale;
+          line.x1 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+          line.y1 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+        } else if (drawer.mode === 'circle') {
+          circle.refresh();
+          circle.x = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+          circle.y = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+        } else if (drawer.mode === 'square') {
+          square.refresh();
+          square.x1 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+          square.y1 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
         }
       }
 
       function drawFigure(event) {
         if (drawer.active) {
           if (drawer.mode === 'line') {
-            if (drawer.mode === 'line') {
-              line.x2 = (x(event.x) + drawer.scrollX) / drawer.scale;
-              line.y2 = (y(event.y) + drawer.scrollY) / drawer.scale;
-            }
+            line.x2 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+            line.y2 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+          } else if (drawer.mode === 'circle') {
+            circle.radiusEndX = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+            circle.radiusEndY = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+          } else if (drawer.mode === 'square') {
+            square.x2 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+            square.y2 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
           }
         }
       }
@@ -466,6 +623,10 @@
 
       function y(yVal) {
         return yVal - canvas.offsetTop;
+      }
+
+      function point(xVal, yVal) {
+        return { x: xVal, y: yVal };
       }
 
       function info(type, text) {
