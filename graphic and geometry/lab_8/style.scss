@@ -69,12 +69,20 @@ body {
 
 .info-panel {
 	display: flex;
+	align-items: center;
 	padding: 5px;
 	padding-right: 15px;
 	align-self: flex-end;
+	white-space: nowrap;
 
 	>div {
 		margin-left: 20px;
+		display: flex;
+		align-items: center;
+
+		>* {
+			margin-left: 5px;
+		}
 	}
 }
 

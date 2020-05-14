@@ -98,6 +98,16 @@
       <div class="info-zoom">
         Zoom: <span class="text-primary bold">x1.0</span>
       </div>
+      <div class="info-scale-point">
+        Zoom point:
+        <select
+          class="form-control form-control-sm"
+          onchange="setScalePoint(event)"
+        >
+          <option value="center">center</option>
+          <option value="cursor">cursor</option>
+        </select>
+      </div>
     </div>
 
     <script>
@@ -144,18 +154,37 @@
 
         currentFigure;
 
+        mousePosX;
+        mousePosY;
+        scalePoint = 'center';
+
         constructor(metrix) {
           this.metrix = metrix;
+          this.mousePosX = Math.round(w / 2);
+          this.mousePosY = Math.round(h / 2);
         }
 
         draw() {
-          const scaleCorrectionX =
-            (this.scrollX + Math.round(w / 2)) * this.scale -
-            (this.scrollX + Math.round(w / 2));
+          let scaleCorrectionX;
+          let scaleCorrectionY;
 
-          const scaleCorrectionY =
-            (this.scrollY + Math.round(h / 2)) * this.scale -
-            (this.scrollY + Math.round(h / 2));
+          if (this.scalePoint === 'center') {
+            scaleCorrectionX =
+              (this.scrollX + Math.round(w / 2)) * this.scale -
+              (this.scrollX + Math.round(w / 2));
+
+            scaleCorrectionY =
+              (this.scrollY + Math.round(h / 2)) * this.scale -
+              (this.scrollY + Math.round(h / 2));
+          } else {
+            scaleCorrectionX =
+              (this.scrollX + Math.round(this.mousePosX)) * this.scale -
+              (this.scrollX + Math.round(this.mousePosX));
+
+            scaleCorrectionY =
+              (this.scrollY + Math.round(this.mousePosY)) * this.scale -
+              (this.scrollY + Math.round(this.mousePosY));
+          }
 
           const params = {
             scale: this.scale,
@@ -614,7 +643,7 @@
 
         if (currentFigure) {
           drawer.addFigure(currentFigure);
-					currentFigure = undefined;
+          currentFigure = undefined;
         }
       }
 
@@ -667,6 +696,9 @@
         if (event.ctrlKey) {
           event.preventDefault();
 
+          drawer.mousePosX = x(event.x);
+          drawer.mousePosY = y(event.y);
+
           if (event.wheelDelta > 0) {
             if (drawer.scale < 10) {
               drawer.scale += 0.1;
@@ -690,6 +722,10 @@
 
       function setCurrentColor(event) {
         currentColor = event.target.value;
+      }
+
+      function setScalePoint(event) {
+        drawer.scalePoint = event.target.value;
       }
 
       // stop animation
