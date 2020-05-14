@@ -17,92 +17,9 @@
       rel="stylesheet"
     />
 
+    <link rel="stylesheet" href="style.css" />
+
     <title>Document</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        user-select: none;
-      }
-
-      .container-fluid {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        padding-right: 0;
-      }
-
-      .work-area {
-        display: flex;
-        flex: auto;
-        height: 100%;
-        padding: 15px;
-        padding-bottom: 0;
-      }
-
-      .canvas-container {
-        flex: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        border: 1px solid black;
-      }
-
-      .mode-handlers {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .mode-handlers .btn {
-        margin-top: 15px;
-      }
-
-      .mode-handler {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 50px;
-        height: 50px;
-        font-size: 19px;
-      }
-
-      .mode-handler i {
-        pointer-events: none;
-      }
-
-      .mode-handler.active {
-        color: #2de657 !important;
-      }
-
-      .line-icon {
-        transform: rotate(135deg) scaleX(1.5);
-      }
-
-      .info-panel {
-        display: flex;
-        padding: 5px;
-        padding-right: 15px;
-        align-self: flex-end;
-      }
-
-      .info-panel > div {
-        margin-left: 20px;
-      }
-
-      .bold {
-        font-weight: 600;
-      }
-    </style>
   </head>
 
   <body>
@@ -154,7 +71,7 @@
       </div>
 
       <div class="work-area">
-        <div class="canvas-container">
+        <div class="canvas-container rounded-lg">
           <canvas
             onmousewheel="scrollCanvas(event); zoomCanvas(event)"
             onmousedown="startFigure(event)"
@@ -162,6 +79,12 @@
             onmouseup="finishFigure(event)"
           ></canvas>
         </div>
+      </div>
+
+      <div class="elements-wrapper">
+        <ul class="elements-list info-elements">
+          <div>No elements</div>
+        </ul>
       </div>
     </div>
 
@@ -178,6 +101,7 @@
     </div>
 
     <script>
+      window.oncontextmenu = (event) => event.preventDefault();
       const container = document.querySelector('.canvas-container');
       const canvas = document.querySelector('canvas');
       const ctx = canvas.getContext('2d');
@@ -218,9 +142,10 @@
 
         p;
 
-        constructor(metrix, figures = []) {
+        currentFigure;
+
+        constructor(metrix) {
           this.metrix = metrix;
-          this.figures = figures;
         }
 
         draw() {
@@ -242,26 +167,100 @@
 
           this.p = params;
 
-          info(
-            'scroll',
-            `X:${(this.scrollX + Math.round(w / 2)).toFixed(1)}
-      			Y:${(this.scrollY + Math.round(h / 2)).toFixed(1)}`
-          );
-
           this.figures
             .sort(
               (a, b) =>
                 new Date(a.lastUsed).getTime() - new Date(b.lastUsed).getTime()
             )
             .map((fig) => {
-              if (fig.update) {
+              if (fig && fig.update && !fig.hidden) {
                 fig.update(params);
               }
               fig.draw();
             });
 
+          if (this.currentFigure) {
+            if (this.currentFigure.update) {
+              this.currentFigure.update(params);
+            }
+            this.currentFigure.draw();
+          }
+
           this.metrix.update(params);
           this.metrix.draw();
+        }
+
+        addFigure(fig) {
+          fig.id = Math.random().toString(32).substr(2, 6);
+          fig.type = this.mode;
+          this.figures.push(fig);
+          this.currentFigure = undefined;
+
+          this.handleFiguresView();
+        }
+
+        deleteFigure(figId) {
+          this.figures = this.figures.filter((f) => f.id !== figId);
+
+          this.handleFiguresView();
+        }
+
+        handleFiguresView() {
+          const elementsList = document.querySelector('.elements-list');
+          elementsList.innerHTML = this.figures.length
+            ? ''
+            : '<div>No elements</div>';
+
+          this.figures.map((fig) => {
+            const el = document.createElement('li');
+            el.className =
+              'elements-list-item rounded px-2 py-1 bg-secondary text-white';
+
+            if (fig.active) {
+              el.classList.add('active');
+            }
+
+            let elIcon;
+            if (fig.type === 'line') {
+              elIcon = '<i class="material-icons line-icon">remove</i>';
+            } else if (fig.type === 'circle') {
+              elIcon = '<i class="far fa-circle"></i>';
+            } else if (fig.type === 'square') {
+              elIcon = '<i class="far fa-square"></i>';
+            }
+
+            el.innerHTML = `${elIcon}
+							<span class="ml-2 bold">
+								${fig.type} | ${fig.id}
+							</span>
+						`;
+
+            const deleteIcon = document.createElement('i');
+            deleteIcon.className = 'material-icons ml-auto delete-icon';
+            deleteIcon.innerText = 'delete';
+            deleteIcon.onclick = (event) => this.deleteFigure(fig.id);
+
+            el.onclick = (event) => {
+              if (fig.active) {
+                this.figures.map((f) => {
+                  f.active = false;
+                });
+              } else {
+                this.figures.map((f) => {
+                  f.active = false;
+                });
+
+                fig.active = true;
+              }
+
+              this.handleFiguresView();
+            };
+
+            fig.activeColor = 'red';
+
+            el.appendChild(deleteIcon);
+            elementsList.appendChild(el);
+          });
         }
       }
 
@@ -380,6 +379,8 @@
         lastUsed;
 
         color;
+        active;
+        activeColor;
 
         constructor() {
           this.width = 2;
@@ -410,7 +411,7 @@
             (this.y2 - this.offsetY) * this.scale
           );
           ctx.lineWidth = this.width;
-          ctx.strokeStyle = this.color;
+          ctx.strokeStyle = this.active ? this.activeColor : this.color;
           ctx.closePath();
           ctx.stroke();
           ctx.refresh();
@@ -434,6 +435,8 @@
         lastUsed;
 
         color;
+        active;
+        activeColor;
 
         refresh() {
           this.x = undefined;
@@ -465,7 +468,7 @@
             Math.PI * 2
           );
           ctx.lineWidth = this.width;
-          ctx.strokeStyle = this.color;
+          ctx.strokeStyle = this.active ? this.activeColor : this.color;
           ctx.closePath();
           ctx.stroke();
           ctx.refresh();
@@ -491,6 +494,8 @@
         lastUsed;
 
         color;
+        active;
+        activeColor;
 
         refresh() {
           this.x1 = undefined;
@@ -525,7 +530,7 @@
             this.sizeY
           );
           ctx.lineWidth = this.width;
-          ctx.strokeStyle = this.color;
+          ctx.strokeStyle = this.active ? this.activeColor : this.color;
           ctx.closePath();
           ctx.stroke();
           ctx.refresh();
@@ -533,10 +538,10 @@
       }
 
       const metrix = new Metrix();
-      const line = new Line();
-      const circle = new Circle();
-      const square = new Square();
-      const drawer = new Drawer(metrix, [line, circle, square]);
+      const drawer = new Drawer(metrix);
+
+      let currentFigure;
+
       function animate() {
         if (drawer.animate) {
           ctx.clear();
@@ -549,46 +554,67 @@
 
       // FIGURE FUNCTIONS ====
       function startFigure(event) {
+        if (event.button) {
+          return;
+        }
+
         drawer.active = true;
 
         if (drawer.mode === 'line') {
-          line.refresh();
-          line.x1 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
-          line.y1 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
-          line.lastUsed = new Date();
-          line.color = currentColor;
+          currentFigure = new Line();
+          currentFigure.refresh();
+          currentFigure.x1 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+          currentFigure.y1 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+          currentFigure.lastUsed = new Date();
+          currentFigure.color = currentColor;
         } else if (drawer.mode === 'circle') {
-          circle.refresh();
-          circle.x = (x(event.x) + drawer.p.scrollX) / drawer.scale;
-          circle.y = (y(event.y) + drawer.p.scrollY) / drawer.scale;
-          circle.lastUsed = new Date();
-          circle.color = currentColor;
+          currentFigure = new Circle();
+          currentFigure.refresh();
+          currentFigure.x = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+          currentFigure.y = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+          currentFigure.lastUsed = new Date();
+          currentFigure.color = currentColor;
         } else if (drawer.mode === 'square') {
-          square.refresh();
-          square.x1 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
-          square.y1 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
-          square.lastUsed = new Date();
-          square.color = currentColor;
+          currentFigure = new Square();
+          currentFigure.refresh();
+          currentFigure.x1 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+          currentFigure.y1 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+          currentFigure.lastUsed = new Date();
+          currentFigure.color = currentColor;
+        }
+
+        if (currentFigure) {
+          drawer.currentFigure = currentFigure;
         }
       }
 
       function drawFigure(event) {
         if (drawer.active) {
           if (drawer.mode === 'line') {
-            line.x2 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
-            line.y2 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+            currentFigure.x2 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+            currentFigure.y2 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
           } else if (drawer.mode === 'circle') {
-            circle.radiusEndX = (x(event.x) + drawer.p.scrollX) / drawer.scale;
-            circle.radiusEndY = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+            currentFigure.radiusEndX =
+              (x(event.x) + drawer.p.scrollX) / drawer.scale;
+            currentFigure.radiusEndY =
+              (y(event.y) + drawer.p.scrollY) / drawer.scale;
           } else if (drawer.mode === 'square') {
-            square.x2 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
-            square.y2 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
+            currentFigure.x2 = (x(event.x) + drawer.p.scrollX) / drawer.scale;
+            currentFigure.y2 = (y(event.y) + drawer.p.scrollY) / drawer.scale;
           }
         }
       }
 
       function finishFigure(event) {
+        if (event.button) {
+          return;
+        }
+
         drawer.active = false;
+
+        if (currentFigure) {
+          drawer.addFigure(currentFigure);
+        }
       }
 
       // MAIN FUNCTIONS ====
@@ -626,6 +652,12 @@
               drawer.scrollY += scrollDelta;
             }
           }
+
+          info(
+            'scroll',
+            `X:${(drawer.scrollX + Math.round(w / 2)).toFixed(1)}
+      			Y:${(drawer.scrollY + Math.round(h / 2)).toFixed(1)}`
+          );
         }
       }
 
