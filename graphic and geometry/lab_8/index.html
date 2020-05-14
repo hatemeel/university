@@ -17,7 +17,10 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://hatemeel.github.io/university/graphic%20and%20geometry/lab_8/style.css"
+    />
 
     <title>Document</title>
   </head>
@@ -115,9 +118,13 @@
       const container = document.querySelector('.canvas-container');
       const canvas = document.querySelector('canvas');
       const ctx = canvas.getContext('2d');
+
+      // canvas clear method
       CanvasRenderingContext2D.prototype.clear = function () {
         this.clearRect(0, 0, this.canvas.width, this.canvas.height);
       };
+
+      // canvas refresh method
       CanvasRenderingContext2D.prototype.refresh = function () {
         this.strokeStyle = 'black';
         this.fillStyle = 'black';
@@ -132,30 +139,44 @@
       canvas.width = w;
       canvas.height = h;
 
+      // color for figure drawing
       let currentColor = '#000000';
 
+      // global drawer class
       class Drawer {
+        // draw if true
         animate = true;
 
-        // modes [cursor, line, ...]
+        // figure types [cursor, line, circle, square]
         mode = 'line';
+
+        // draw figure if true
         active = false;
 
+        // scale value
         scale = 1;
-        moveX = 0;
-        moveY = 0;
+
+        // scroll offsets
         scrollX = -Math.round(w / 2);
         scrollY = -Math.round(h / 2);
 
+        // figures to draw
         figures = [];
+
+        // metrix object
         metrix;
 
+        // params for sharing
         p;
 
+        // figure that is drawing
         currentFigure;
 
+        // mouse position coordinates
         mousePosX;
         mousePosY;
+
+        // scale point [center, cursor]
         scalePoint = 'center';
 
         constructor(metrix) {
@@ -164,7 +185,10 @@
           this.mousePosY = Math.round(h / 2);
         }
 
+        // drawer main draw function
+        // draw all metrix and figures
         draw() {
+          // scale correction depends on scale point
           let scaleCorrectionX;
           let scaleCorrectionY;
 
@@ -188,14 +212,13 @@
 
           const params = {
             scale: this.scale,
-            moveX: this.moveX,
-            moveY: this.moveY,
             scrollX: this.scrollX + scaleCorrectionX,
             scrollY: this.scrollY + scaleCorrectionY,
           };
 
           this.p = params;
 
+          // draw all figures
           this.figures
             .sort(
               (a, b) =>
@@ -208,6 +231,7 @@
               fig.draw();
             });
 
+          // draw current figure
           if (this.currentFigure) {
             if (this.currentFigure.update) {
               this.currentFigure.update(params);
@@ -215,10 +239,12 @@
             this.currentFigure.draw();
           }
 
+          // draw metrix
           this.metrix.update(params);
           this.metrix.draw();
         }
 
+        // add figure to drawer figures
         addFigure(fig) {
           fig.id = Math.random().toString(32).substr(2, 6);
           fig.type = this.mode;
@@ -228,12 +254,14 @@
           this.handleFiguresView();
         }
 
+        // remove figure from drawer figures
         deleteFigure(figId) {
           this.figures = this.figures.filter((f) => f.id !== figId);
 
           this.handleFiguresView();
         }
 
+        // show figure handlers on right sidebar
         handleFiguresView() {
           const elementsList = document.querySelector('.elements-list');
           elementsList.innerHTML = this.figures.length
@@ -293,6 +321,7 @@
         }
       }
 
+      // main metrix class
       class Metrix {
         startX;
         endX;
@@ -349,12 +378,14 @@
           ctx.textAlign = 'center';
           for (let i = this.startX; i < this.endX; i += 1) {
             if (i - this.startX > 5 && i % (scaleCorrection / 2) === 0) {
+              // draw small lines horizontal
               ctx.beginPath();
               ctx.moveTo((i - this.startX) * this.scale, 2);
               ctx.lineTo((i - this.startX) * this.scale, 8);
               ctx.closePath();
               ctx.stroke();
 
+              // draw numbers horizontal
               if (i % scaleCorrection === 0 && i - this.startX > 20) {
                 ctx.fillText(i, (i - this.startX) * this.scale, 19);
               }
@@ -365,6 +396,7 @@
           ctx.textBaseline = 'middle';
           for (let i = this.startY; i < this.endY; i += 1) {
             if (i - this.startY > 5 && i % (scaleCorrection / 2) === 0) {
+              // draw small lines horizontal
               ctx.beginPath();
               ctx.moveTo(2, (i - this.startY) * this.scale);
               ctx.lineTo(8, (i - this.startY) * this.scale);
@@ -372,6 +404,7 @@
               ctx.stroke();
 
               if (i % scaleCorrection === 0 && i - this.startY > 20) {
+                // draw numbers horizontal
                 ctx.fillText(i, 11, (i - this.startY) * this.scale);
               }
             }
@@ -379,6 +412,7 @@
 
           ctx.refresh();
 
+          // lines that indicates mouse position
           ctx.strokeStyle = 'red';
           ctx.beginPath();
           ctx.moveTo(this.mousePosX, 0);
@@ -392,29 +426,41 @@
         }
       }
 
+      // global line figure class
       class Line {
+        // point coordinates
         x1;
         x2;
         y1;
         y2;
 
+        // scroll offset
         offsetX;
         offsetY;
 
+        // line width
         width;
 
+        // global scale value
         scale;
 
+        // value just for sorting
         lastUsed;
 
+        // main color
         color;
+
+        // if selected
         active;
+
+        // color when selected
         activeColor;
 
         constructor() {
           this.width = 2;
         }
 
+        // reset figure coordinates
         refresh() {
           this.x1 = undefined;
           this.x2 = undefined;
@@ -422,6 +468,7 @@
           this.y2 = undefined;
         }
 
+        // update figure properties before draw
         update({ scrollX, scrollY, scale }) {
           this.width = 2 * scale;
           this.scale = scale;
@@ -429,6 +476,7 @@
           this.offsetY = Math.round(scrollY / this.scale);
         }
 
+        // draw figure with scale and offset correction
         draw() {
           ctx.beginPath();
           ctx.moveTo(
@@ -447,26 +495,38 @@
         }
       }
 
+      // global circle class
       class Circle {
+        // circle coordinates and radius
         x;
         y;
         radiusEndX;
         radiusEndY;
         radius;
 
+        // scroll offset
         offsetX;
         offsetY;
 
+        // line width
         width;
 
+        // global scale value
         scale;
 
+        // value just for sorting
         lastUsed;
 
+        // main color
         color;
+
+        // if selected
         active;
+
+        // color when selected
         activeColor;
 
+        // reset figure properties
         refresh() {
           this.x = undefined;
           this.y = undefined;
@@ -475,6 +535,7 @@
           this.radius = undefined;
         }
 
+        // update figure properties before draw
         update({ scrollX, scrollY, scale }) {
           this.width = 2 * scale;
           this.scale = scale;
@@ -487,6 +548,7 @@
             ) * this.scale;
         }
 
+        // draw figure with scale and offset correction
         draw() {
           ctx.beginPath();
           ctx.arc(
@@ -504,7 +566,9 @@
         }
       }
 
+      // global square figure class
       class Square {
+        // square coordinates and sizes
         x1;
         y1;
         x2;
@@ -513,19 +577,29 @@
         sizeX;
         sizeY;
 
+        // scroll offset
         offsetX;
         offsetY;
 
+        // line width
         width;
 
+        // global scale value
         scale;
 
+        // value just for sorting
         lastUsed;
 
+        // main color
         color;
+
+        // if selected
         active;
+
+        // color when selected
         activeColor;
 
+        // reset figure properties
         refresh() {
           this.x1 = undefined;
           this.y1 = undefined;
@@ -535,6 +609,7 @@
           this.sizeY = undefined;
         }
 
+        // update figure properties before draw
         update({ scrollX, scrollY, scale }) {
           this.width = 2 * scale;
           this.scale = scale;
@@ -550,6 +625,7 @@
             (this.y1 - this.offsetY) * this.scale;
         }
 
+        // draw figure with scale and offset correction
         draw() {
           ctx.beginPath();
           ctx.rect(
@@ -571,6 +647,7 @@
 
       let currentFigure;
 
+      // main animation function
       function animate() {
         if (drawer.animate) {
           ctx.clear();
@@ -582,6 +659,7 @@
       animate();
 
       // FIGURE FUNCTIONS ====
+      // start drawing figure
       function startFigure(event) {
         if (event.button) {
           return;
@@ -617,6 +695,7 @@
         }
       }
 
+      // draw figure
       function drawFigure(event) {
         if (drawer.active) {
           if (drawer.mode === 'line') {
@@ -634,6 +713,7 @@
         }
       }
 
+      // finish figure drawing and add figure to drawer figures
       function finishFigure(event) {
         if (event.button) {
           return;
@@ -648,7 +728,7 @@
       }
 
       // MAIN FUNCTIONS ====
-      // mode handlers
+      // drawer mode handlers
       function toggleMode(event) {
         document.querySelectorAll('.mode-handler').forEach((el) => {
           el.classList.remove('active');
@@ -715,15 +795,18 @@
         }
       }
 
+      // track mouse position
       function showMousePos(event) {
         metrix.mousePosX = x(event.x);
         metrix.mousePosY = y(event.y);
       }
 
+      // change color for new figure
       function setCurrentColor(event) {
         currentColor = event.target.value;
       }
 
+      // change scale point [center, cursor]
       function setScalePoint(event) {
         drawer.scalePoint = event.target.value;
       }
@@ -735,22 +818,25 @@
       }
 
       // HELPERS ====
+      // vector length
       function getLength(a, b) {
         return Math.pow(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2), 0.5);
       }
 
+      // coordinates with styles offset
       function x(xVal) {
         return xVal - canvas.offsetLeft;
       }
-
       function y(yVal) {
         return yVal - canvas.offsetTop;
       }
 
+      // formated point
       function point(xVal, yVal) {
         return { x: xVal, y: yVal };
       }
 
+      // set text to special element
       function info(type, text) {
         document.querySelector(`.info-${type} span`).innerHTML = text;
       }
