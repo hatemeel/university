@@ -1,0 +1,215 @@
+@import url(https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css);
+* {
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+ul {
+  list-style-type: none;
+}
+
+.container {
+  display: -ms-grid;
+  display: grid;
+      grid-template-areas: 'header header header' 'menu main sidebar' 'footer footer footer';
+  -ms-grid-rows: 300px 1fr 100px;
+      grid-template-rows: 300px 1fr 100px;
+  min-height: 100vh;
+}
+
+.header {
+  position: relative;
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  -ms-grid-column-span: 3;
+  grid-area: header;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.header:before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url(../assets/bg.jpg);
+  background-size: cover;
+}
+
+.header h1 {
+  margin-bottom: 20px;
+}
+
+.menu {
+  -ms-grid-row: 2;
+  -ms-grid-column: 1;
+  grid-area: menu;
+}
+
+.main-content {
+  -ms-grid-row: 2;
+  -ms-grid-column: 2;
+  grid-area: main;
+}
+
+.sidebar {
+  -ms-grid-row: 2;
+  -ms-grid-column: 3;
+  grid-area: sidebar;
+}
+
+.footer {
+  -ms-grid-row: 3;
+  -ms-grid-column: 1;
+  -ms-grid-column-span: 3;
+  grid-area: footer;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 10px 30px;
+  background-color: #202020;
+  color: white;
+  margin-top: 50px;
+}
+
+.footer__socials {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  font-size: 24px;
+  margin-left: auto;
+}
+
+.footer__socials a {
+  color: white;
+  text-decoration: none;
+  margin: 0 15px;
+}
+
+.footer__socials a:hover {
+  color: #e62429;
+}
+
+.character {
+  display: block;
+}
+
+.character__image {
+  overflow: hidden;
+}
+
+.character__image img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+.character__name {
+  text-transform: uppercase;
+  color: white;
+  background-color: #202020;
+  padding: 5px 10px;
+}
+
+.container-index {
+  -ms-grid-columns: 0 1fr 0;
+      grid-template-columns: 0 1fr 0;
+}
+
+.container-index .main-content {
+  padding: 20px;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: (minmax(200px, 1fr))[auto-fill];
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.container-character {
+  -ms-grid-columns: 200px 1fr 100px;
+      grid-template-columns: 200px 1fr 100px;
+}
+
+.container-character .main-content {
+  padding: 50px 100px 10px;
+}
+
+.container-character .main-content h2 {
+  text-transform: uppercase;
+  border-bottom: 2px solid #e62429;
+}
+
+.container-character .main-content p {
+  margin-top: 20px;
+  max-width: 600px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.container-character .menu {
+  padding: 10px;
+}
+
+.container-character .menu ul {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.container-character .menu ul a {
+  margin-top: 10px;
+  color: #358ada;
+}
+
+.container-character .sidebar {
+  padding: 10px;
+}
+
+.container-character .sidebar ul {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.container-character .sidebar ul a {
+  margin-top: 10px;
+  color: #358ada;
+}
+/*# sourceMappingURL=style.css.map */

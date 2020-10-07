@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taras Savchyn Lab-1</title>
+
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 1.2rem;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      nav ul {
+        list-style-type: none;
+        display: flex;
+      }
+
+      nav ul li:not(:first-child) {
+        margin-left: 15px;
+      }
+
+      .to-top {
+        display: block;
+        width: fit-content;
+        margin: 20px 10px 20px auto;
+        text-decoration: none;
+      }
+
+      .images-container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .image-section {
+        display: flex;
+      }
+
+      .image-section:nth-child(1) {
+        justify-content: center;
+      }
+
+      .image-section:nth-child(3) {
+        justify-content: flex-end;
+      }
+
+      .image-section img {
+        width: 200px;
+      }
+
+      .image-section:nth-child(1) img {
+        border: 25px solid lightblue;
+        margin: 50px;
+      }
+
+      .image-section:nth-child(2) img {
+        border: 5px solid lightblue;
+        margin: 15px 0;
+      }
+
+      .image-section:nth-child(3) img {
+        border: 40px solid lightblue;
+        margin: 0 55px;
+      }
+
+      .author-container {
+        width: 500px;
+        margin-bottom: 50px;
+      }
+
+      .author-container img {
+        width: 300px;
+        float: left;
+        margin-right: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav>
+        <ul>
+          <li>
+            <a href="#about">About me</a>
+          </li>
+
+          <li>
+            <a href="#images">Images</a>
+          </li>
+
+          <li>
+            <a href="#author">Author</a>
+          </li>
+        </ul>
+      </nav>
+
+      <p id="about">
+        Hi I'm Taras. Courteous and enthusiastic, I am interested in IT and
+        everything in its orbit. I began to be fascinated by web programming a
+        years ago, e.g. developing apps and building websites. I am therefore
+        currently looking for a job or an internship as a front-end developer.
+      </p>
+
+      <hr />
+
+      <a href="#" class="to-top">To top</a>
+
+      <div class="images-container" id="images">
+        <section class="image-section">
+          <img
+            src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
+            alt=""
+          />
+        </section>
+
+        <section class="image-section">
+          <img
+            src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
+            alt=""
+          />
+        </section>
+
+        <section class="image-section">
+          <img
+            src="https://images.unsplash.com/photo-1527903789995-dc8ad2ad6de0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
+            alt=""
+          />
+        </section>
+      </div>
+
+      <hr />
+
+      <a href="#" class="to-top">To top</a>
+
+      <div class="author-container" id="author">
+        <img
+          src="https://see.news/wp-content/uploads/2020/06/Tom-Cruise.jpg"
+          alt=""
+        />
+
+        <h3>Tom Cruise</h3>
+
+        <p>
+          In 1976, if you had told fourteen-year-old Franciscan seminary student
+          Thomas Cruise Mapother IV that one day in the not too distant future
+          he would be Tom Cruise, one of the top 100 movie stars of all time, he
+          would have probably grinned and told you that his ambition was to join
+          the priesthood. Nonetheless, this sensitive, deeply religious
+          youngster who was born in 1962 in Syracuse, New York, was destined to
+          become one of the highest paid and most sought after actors in screen
+          history.
+        </p>
+      </div>
+
+      <hr />
+
+      <a href="#" class="to-top">To top</a>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,82 @@
+@import url(https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css);
+body {
+  min-height: 100vh;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+label {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+[data-if-calculation]:not(.active-calculation) {
+  display: none;
+}
+
+.w-fit {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.menu {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  color: white;
+  white-space: nowrap;
+}
+
+.menu-item {
+  position: relative;
+  border-bottom: 1px solid transparent;
+}
+
+.menu-item.active {
+  border-color: white;
+}
+
+.menu-item.active > .menu-sub {
+  visibility: visible;
+  opacity: 1;
+}
+
+.menu-link {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  -webkit-transition: 0.15s;
+  transition: 0.15s;
+}
+
+.menu-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.menu-sub {
+  position: absolute;
+  z-index: 1;
+  top: calc(100% + 1px);
+  left: 20px;
+  background-color: var(--dark);
+  visibility: hidden;
+  opacity: 0;
+  -webkit-transition: 0.15s;
+  transition: 0.15s;
+}
+
+main {
+  display: none;
+}
+/*# sourceMappingURL=style.css.map */

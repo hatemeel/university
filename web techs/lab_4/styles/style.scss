@@ -1,0 +1,20 @@
+@import url(https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css);
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  user-select: none;
+}
+
+[data-if-calculation] {
+  &:not(.active-calculation) {
+    display: none;
+  }
+}
+
+.w-fit {
+  width: fit-content;
+}
