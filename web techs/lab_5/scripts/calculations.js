@@ -6,31 +6,15 @@ const calculationTypes = [
   'sphere_volume',
 ];
 
-calculationTypes.map((type, index) => {
-  document.querySelector('#calculation-types').insertAdjacentHTML(
-    'beforeend',
-    `
-		<div class="custom-control custom-radio ml-4 text-capitalize">
-			<input
-				onchange="selectCalculationType('${type}')"
-				type="radio" id="calculation-${index}"
-				name="figure-type"
-				class="custom-control-input"
-				${!index && 'checked'}
-			>
-			<label class="custom-control-label" for="calculation-${index}">${type.replace(
-      '_',
-      ' '
-    )}</label>
-		</div>
-	`
-  );
-});
-
 let selectedCalcType;
+
 const form = document.querySelector('form');
 
-const selectCalculationType = (calcType = calculationTypes[0]) => {
+const selectCalculationType = (calcType) => {
+  if (!calcType) {
+    calcType = location.search.replace('?type=', '') || calculationTypes[0];
+  }
+
   [...document.querySelectorAll('[data-if-calculation]')].map((el) => {
     if (el.dataset['ifCalculation'] === calcType) {
       el.classList.add('active-calculation');
@@ -43,6 +27,26 @@ const selectCalculationType = (calcType = calculationTypes[0]) => {
   selectedCalcType = calcType;
 };
 selectCalculationType();
+
+calculationTypes.map((type, index) => {
+  document.querySelector('#calculation-types').insertAdjacentHTML(
+    'beforeend',
+    `
+		<div class="custom-control custom-radio ml-4 text-capitalize">
+			<input
+				type="radio" id="calculation-${index}"
+				name="figure-type"
+				class="custom-control-input"
+				${type === selectedCalcType && 'checked'}
+			>
+			<a href="?type=${type}" class="custom-control-label text-dark" for="calculation-${index}">${type.replace(
+      '_',
+      ' '
+    )}</a>
+		</div>
+	`
+  );
+});
 
 const clearCalculation = () => {
   document.querySelector('#result').innerHTML = 0;

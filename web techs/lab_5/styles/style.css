@@ -37,16 +37,16 @@ label {
 
 .menu-item {
   position: relative;
-  border-bottom: 1px solid transparent;
-}
-
-.menu-item.active {
-  border-color: white;
 }
 
 .menu-item.active > .menu-sub {
   visibility: visible;
   opacity: 1;
+}
+
+.menu-item i {
+  pointer-events: none;
+  margin-left: 5px;
 }
 
 .menu-link {
@@ -58,6 +58,13 @@ label {
           user-select: none;
   -webkit-transition: 0.15s;
   transition: 0.15s;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  color: white !important;
 }
 
 .menu-link:hover {
@@ -67,16 +74,83 @@ label {
 .menu-sub {
   position: absolute;
   z-index: 1;
-  top: calc(100% + 1px);
-  left: 20px;
+  top: calc(100% + 0.25rem);
+  left: 0;
   background-color: var(--dark);
   visibility: hidden;
   opacity: 0;
   -webkit-transition: 0.15s;
   transition: 0.15s;
+  -webkit-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
-main {
-  display: none;
+.menu-sub .menu-link i {
+  -webkit-transform: rotate(270deg);
+          transform: rotate(270deg);
+}
+
+.menu-sub .menu-sub {
+  left: calc(100% + 0.25rem);
+  top: 0;
+}
+
+.calculator {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.calculator .form-control {
+  text-align: end;
+}
+
+.calculator-units .d-grid {
+  display: -ms-grid;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+  -ms-grid-columns: (45px)[4];
+      grid-template-columns: repeat(4, 45px);
+}
+
+.calculator-units .d-grid:first-child {
+  -ms-grid-columns: 155px 45px;
+      grid-template-columns: 155px 45px;
+}
+
+.calculator-units .d-grid:last-child {
+  -ms-grid-columns: 100px 45px 45px;
+      grid-template-columns: 100px 45px 45px;
+  margin-bottom: 0;
+}
+
+.calculator-units .btn i {
+  pointer-events: none;
+}
+
+.flex-1 {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+}
+
+.flex-2 {
+  -webkit-box-flex: 2;
+      -ms-flex: 2;
+          flex: 2;
+}
+
+.flex-3 {
+  -webkit-box-flex: 3;
+      -ms-flex: 3;
+          flex: 3;
+}
+
+.flex-4 {
+  -webkit-box-flex: 4;
+      -ms-flex: 4;
+          flex: 4;
 }
 /*# sourceMappingURL=style.css.map */

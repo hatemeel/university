@@ -4,25 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Test</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="../styles/style.css" />
   </head>
   <body>
-    <header class="shadow-sm sticky-top">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="../pages/calculations.html">
-                Calculations
-              </a>
-            </li>
-            <li class="nav-item active">
-              <a class="nav-link" href="../pages/test.html">Test</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-    </header>
+    <header class="bg-dark py-4"></header>
+
+    <nav
+      class="navbar navbar-expand-lg navbar-dark bg-dark border-top py-0 sticky-top"
+    >
+      <div class="container">
+        <div class="menu"></div>
+      </div>
+    </nav>
 
     <main class="container py-4">
       <ul id="questions-container" class="list-group list-group-flush"></ul>
@@ -46,6 +43,7 @@
 
     <footer class="py-5 bg-dark mt-auto"></footer>
 
+    <script src="../scripts/common.js"></script>
     <script src="../scripts/test.js"></script>
   </body>
 </html>

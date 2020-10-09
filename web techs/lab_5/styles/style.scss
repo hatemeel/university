@@ -1,4 +1,5 @@
 @import url(https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css);
+
 body {
   min-height: 100vh;
   display: flex;
@@ -26,15 +27,17 @@ label {
 
   &-item {
     position: relative;
-    border-bottom: 1px solid transparent;
 
     &.active {
-      border-color: white;
-
       > .menu-sub {
         visibility: visible;
         opacity: 1;
       }
+    }
+
+    i {
+      pointer-events: none;
+      margin-left: 5px;
     }
   }
 
@@ -43,6 +46,9 @@ label {
     cursor: pointer;
     user-select: none;
     transition: 0.15s;
+    display: flex;
+    align-items: center;
+    color: white !important;
 
     &:hover {
       background-color: rgba(white, 0.15);
@@ -52,15 +58,74 @@ label {
   &-sub {
     position: absolute;
     z-index: 1;
-    top: calc(100% + 1px);
-    left: 20px;
+    top: calc(100% + 0.25rem);
+    left: 0;
     background-color: var(--dark);
     visibility: hidden;
     opacity: 0;
     transition: 0.15s;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
+    .menu-link {
+      i {
+        transform: rotate(270deg);
+      }
+    }
+
+    .menu-sub {
+      left: calc(100% + 0.25rem);
+      top: 0;
+    }
   }
 }
 
-main {
-  display: none;
+.calculator {
+  width: fit-content;
+  margin: 0 auto;
+
+  .form-control {
+    text-align: end;
+  }
+
+  &-units {
+    .d-grid {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 10px;
+      grid-template-columns: repeat(4, 45px);
+
+      &:first-child {
+        grid-template-columns: 155px 45px;
+      }
+
+      &:last-child {
+        grid-template-columns: 100px 45px 45px;
+        margin-bottom: 0;
+      }
+    }
+
+    .btn {
+      i {
+        pointer-events: none;
+      }
+    }
+  }
+}
+
+.flex {
+  &-1 {
+    flex: 1;
+  }
+
+  &-2 {
+    flex: 2;
+  }
+
+  &-3 {
+    flex: 3;
+  }
+
+  &-4 {
+    flex: 4;
+  }
 }
