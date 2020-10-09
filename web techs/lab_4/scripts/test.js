@@ -45,11 +45,11 @@ const answerQusetion = (questionIndex, answerIndex) => {
 };
 
 const calculate = () => {
-  const hasAnswers = questions.find(({ answers }) =>
-    answers.reduce((acc, value) => acc + value, '')
+  const hasAnswers = questions.find(
+    ({ answers }) => !answers.reduce((acc, value) => acc + value, '')
   );
 
-  if (hasAnswers) {
+  if (!hasAnswers) {
     const result = questions.reduce(
       (acc, { answers }) =>
         acc + answers.reduce((acc, value) => acc + parseInt(value | 0), 0),
@@ -58,7 +58,7 @@ const calculate = () => {
     alert();
     document.querySelector('#result').innerHTML = `Result: ${result}`;
   } else {
-    alert(`You didn't answer any question!`);
+    alert(`You didn't answer all questions!`);
   }
 };
 
