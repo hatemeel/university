@@ -58,6 +58,11 @@ ul {
   grid-area: menu;
 }
 
+nav {
+  position: sticky;
+  top: 10px;
+}
+
 .main-content {
   grid-area: main;
 }

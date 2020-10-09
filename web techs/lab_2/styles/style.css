@@ -68,6 +68,12 @@ ul {
   grid-area: menu;
 }
 
+nav {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 10px;
+}
+
 .main-content {
   -ms-grid-row: 2;
   -ms-grid-column: 2;
