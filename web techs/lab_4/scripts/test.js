@@ -1,3 +1,7 @@
+alert = (text = '') => {
+  document.querySelector('.text-danger').textContent = text;
+};
+
 const questions = Array(10)
   .fill({})
   .map(() => ({ answers: Array(3).fill('') }));
@@ -41,12 +45,21 @@ const answerQusetion = (questionIndex, answerIndex) => {
 };
 
 const calculate = () => {
-  const result = questions.reduce(
-    (acc, { answers }) =>
-      acc + answers.reduce((acc, value) => acc + parseInt(value | 0), 0),
-    0
+  const hasAnswers = questions.find(({ answers }) =>
+    answers.reduce((acc, value) => acc + value, '')
   );
-  document.querySelector('#result').innerHTML = `Result: ${result}`;
+
+  if (hasAnswers) {
+    const result = questions.reduce(
+      (acc, { answers }) =>
+        acc + answers.reduce((acc, value) => acc + parseInt(value | 0), 0),
+      0
+    );
+    alert();
+    document.querySelector('#result').innerHTML = `Result: ${result}`;
+  } else {
+    alert(`You didn't answer any question!`);
+  }
 };
 
 const clearResult = () => {
