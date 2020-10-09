@@ -2,7 +2,7 @@ alert = (text = '') => {
   document.querySelector('.text-danger').textContent = text;
 };
 
-const questions = Array(10)
+let questions = Array(10)
   .fill({})
   .map(() => ({ answers: Array(3).fill('') }));
 
@@ -66,5 +66,10 @@ const clearResult = () => {
   [...document.querySelectorAll('[type="radio"]')].map((el) => {
     el.checked = false;
   });
+  questions = questions.map((question) => ({
+    ...question,
+    answers: Array(3).fill(''),
+  }));
+
   document.querySelector('#result').innerHTML = `Result`;
 };
