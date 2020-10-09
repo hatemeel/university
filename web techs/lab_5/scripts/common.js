@@ -95,13 +95,43 @@ const menuItems = [
       },
       {
         title: 'Some item 1',
-        link: 'https://google.com',
-        blank: true,
+        sub: [
+          {
+            title: 'Sub item 1',
+            link: 'https://google.com',
+            blank: true,
+          },
+          {
+            title: 'Sub item 2',
+            link: 'https://google.com',
+            blank: true,
+          },
+          {
+            title: 'Sub item 3',
+            link: 'https://google.com',
+            blank: true,
+          },
+        ],
       },
       {
         title: 'Some item 2',
-        link: 'https://google.com',
-        blank: true,
+        sub: [
+          {
+            title: 'Sub item 1',
+            link: 'https://google.com',
+            blank: true,
+          },
+          {
+            title: 'Sub item 2',
+            link: 'https://google.com',
+            blank: true,
+          },
+          {
+            title: 'Sub item 3',
+            link: 'https://google.com',
+            blank: true,
+          },
+        ],
       },
     ],
   },
