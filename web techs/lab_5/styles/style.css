@@ -74,7 +74,7 @@ label {
 .menu-sub {
   position: absolute;
   z-index: 1;
-  top: calc(100% + 0.25rem);
+  top: calc(100%);
   left: 0;
   background-color: var(--dark);
   visibility: hidden;
@@ -91,7 +91,7 @@ label {
 }
 
 .menu-sub .menu-sub {
-  left: calc(100% + 0.25rem);
+  left: calc(100%);
   top: 0;
 }
 

@@ -1,6 +1,10 @@
 const menu = document.querySelector('.menu');
 
-document.onclick = ({ target }) => {
+menu.onmouseleave = () => {
+  hideAllItems();
+};
+
+document.onmouseover = ({ target }) => {
   if (target.classList.contains('menu-link')) {
     const menuItem = target.closest('.menu-item');
     const menuSub = menuItem.closest('.menu-sub');
@@ -19,15 +23,11 @@ document.onclick = ({ target }) => {
         }
       });
     } else {
-      menu
-        .querySelectorAll('.menu-item')
-        .forEach((el) => el.classList.remove('active'));
+      hideAllItems();
       menuItem.classList.add('active');
     }
   } else {
-    menu
-      .querySelectorAll('.menu-item')
-      .forEach((el) => el.classList.remove('active'));
+    hideAllItems();
   }
 };
 
@@ -62,13 +62,68 @@ const menuItems = [
       },
       {
         title: 'Calculator',
-        link: 'calculator.html',
+        sub: [
+          {
+            title: 'Integrated',
+            link: 'calculator.html',
+          },
+          {
+            title: 'Desmos',
+            link: 'https://www.desmos.com/scientific',
+            blank: true,
+          },
+          {
+            title: 'Online Calculator',
+            link: 'https://www.online-calculator.com/',
+            blank: true,
+          },
+          {
+            title: 'Calculator.com',
+            link: 'https://calculator.com/',
+            blank: true,
+          },
+        ],
       },
     ],
   },
   {
     title: 'Test',
-    link: 'test.html',
+    sub: [
+      {
+        title: 'My test',
+        link: 'test.html',
+      },
+      {
+        title: 'Some item 1',
+        link: 'https://google.com',
+        blank: true,
+      },
+      {
+        title: 'Some item 2',
+        link: 'https://google.com',
+        blank: true,
+      },
+    ],
+  },
+  {
+    title: 'Google Services',
+    sub: [
+      {
+        title: 'Compute Engine',
+        link: 'https://cloud.google.com/compute',
+        blank: true,
+      },
+      {
+        title: 'Cloud Storage',
+        link: 'https://cloud.google.com/storage',
+        blank: true,
+      },
+      {
+        title: 'Cloud SDK',
+        link: 'https://cloud.google.com/sdk',
+        blank: true,
+      },
+    ],
   },
 ];
 
@@ -89,7 +144,7 @@ function getMenuItemHTML(item) {
 					</div>
 				`
         : `
-					<a href="${item.link}" class="menu-link">
+					<a href="${item.link}" ${item.blank ? 'target="_blank"' : ''} class="menu-link">
 						${item.title}
 						${item.sub && item.sub.length ? '<i class="ri-arrow-down-s-line"></i>' : ''}
 					</a>
@@ -110,4 +165,10 @@ function getMenuItemHTML(item) {
   }
 
   return html;
+}
+
+function hideAllItems() {
+  menu
+    .querySelectorAll('.menu-item')
+    .forEach((el) => el.classList.remove('active'));
 }
