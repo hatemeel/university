@@ -26,9 +26,9 @@ const previewPhoto = async ({ target }) => {
 
 const validators = {
   firstName: (value) => {
-    const regex = /^\w+'?\w+((-| )\w+'?\w+){0,2}$/;
-    const regex_2 = /^\w+'?\w+(-\w+'?\w+){2}$/;
-    const regex_3 = /^\w+'?\w+( \w+'?\w+){2}$/;
+    const regex = /^[A-Z][a-z]+'?[a-z]+((-| )[A-Z][a-z]+'?[a-z]+){0,2}$/;
+    const regex_2 = /^[A-Z][a-z]+'?[a-z]+(-[A-Z][a-z]+'?[a-z]+){2}$/;
+    const regex_3 = /^[A-Z][a-z]+'?[a-z]+( [A-Z][a-z]+'?[a-z]+){2}$/;
     return (
       regex.test(value.trim()) &&
       !regex_2.test(value.trim()) &&
@@ -36,9 +36,9 @@ const validators = {
     );
   },
   lastName: (value) => {
-    const regex = /^\w+'?\w+((-| )\w+'?\w+){0,2}$/;
-    const regex_2 = /^\w+'?\w+(-\w+'?\w+){2}$/;
-    const regex_3 = /^\w+'?\w+( \w+'?\w+){2}$/;
+    const regex = /^[A-Z][a-z]+'?[a-z]+((-| )[A-Z][a-z]+'?[a-z]+){0,2}$/;
+    const regex_2 = /^[A-Z][a-z]+'?[a-z]+(-[A-Z][a-z]+'?[a-z]+){2}$/;
+    const regex_3 = /^[A-Z][a-z]+'?[a-z]+( [A-Z][a-z]+'?[a-z]+){2}$/;
     return (
       regex.test(value.trim()) &&
       !regex_2.test(value.trim()) &&
@@ -46,11 +46,27 @@ const validators = {
     );
   },
   birthDate: (value) => {
-    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-    const regex_2 = /^\d{2}\.\d{2}\.\d{4}$/;
+    const regex = /^\d{2}\/\d{2}\/(\d{2}|\d{4})$/;
+    const regex_2 = /^\d{2}\.\d{2}\.(\d{2}|\d{4})$/;
+
     if (
-      value.match(/\d{4}/) &&
-      value.match(/\d{4}/)[0] < new Date().getFullYear() - 100
+      value.match(/\d{2}$/) &&
+      value.match(/\d{2}$/)[0] &&
+      !value.match(/\d{4}$/)
+    ) {
+      const match = value.match(/\d{2}$/)[0];
+      const year = new Date().getFullYear().toString();
+
+      if (match <= year.slice(2)) {
+        value = value.replace(/\d{2}$/, (g) => `${year.slice(0, 2)}${g}`);
+      } else {
+        value = value.replace(/\d{2}$/, (g) => `${year.slice(0, 2) - 1}${g}`);
+      }
+    }
+
+    if (
+      value.match(/\d{4}$/) &&
+      value.match(/\d{4}$/)[0] < new Date().getFullYear() - 90
     ) {
       return false;
     }
