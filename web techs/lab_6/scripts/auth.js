@@ -48,6 +48,12 @@ const validators = {
   birthDate: (value) => {
     const regex = /^\d{2}\/\d{2}\/\d{4}$/;
     const regex_2 = /^\d{2}\.\d{2}\.\d{4}$/;
+    if (
+      value.match(/\d{4}/) &&
+      value.match(/\d{4}/)[0] < new Date().getFullYear() - 100
+    ) {
+      return false;
+    }
     return regex.test(value.trim()) || regex_2.test(value.trim());
   },
   email: (value) => {
