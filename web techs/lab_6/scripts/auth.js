@@ -30,9 +30,9 @@ const daysInMonth = (year, month) => {
 
 const validators = {
   firstName: (value) => {
-    const regex = /^[A-Z][a-z]+'?[a-z]+((-| )[A-Za-z]+'?[a-z]+){0,2}$/;
-    const regex_2 = /^[A-Z][a-z]+'?[a-z]+(-[A-Za-z]+'?[a-z]+){2}$/;
-    const regex_3 = /^[A-Z][a-z]+'?[a-z]+( [A-Za-z]+'?[a-z]+){2}$/;
+    const regex = /^[A-Z][a-z]*'?[a-z]+((-| )[A-Za-z]+'?[a-z]+){0,2}$/;
+    const regex_2 = /^[A-Z][a-z]*'?[a-z]+(-[A-Za-z]+'?[a-z]+){2}$/;
+    const regex_3 = /^[A-Z][a-z]*'?[a-z]+( [A-Za-z]+'?[a-z]+){2}$/;
     return (
       regex.test(value.trim()) &&
       !regex_2.test(value.trim()) &&
@@ -40,9 +40,9 @@ const validators = {
     );
   },
   lastName: (value) => {
-    const regex = /^[A-Z][a-z]+'?[a-z]+((-| )[A-Za-z]+'?[a-z]+){0,2}$/;
-    const regex_2 = /^[A-Z][a-z]+'?[a-z]+(-[A-Za-z]+'?[a-z]+){2}$/;
-    const regex_3 = /^[A-Z][a-z]+'?[a-z]+( [A-Za-z]+'?[a-z]+){2}$/;
+    const regex = /^[A-Z][a-z]*'?[a-z]+((-| )[A-Za-z]+'?[a-z]+){0,2}$/;
+    const regex_2 = /^[A-Z][a-z]*'?[a-z]+(-[A-Za-z]+'?[a-z]+){2}$/;
+    const regex_3 = /^[A-Z][a-z]*'?[a-z]+( [A-Za-z]+'?[a-z]+){2}$/;
     return (
       regex.test(value.trim()) &&
       !regex_2.test(value.trim()) &&
