@@ -110,7 +110,29 @@ const validateForm = () => {
         return acc;
       }
 
-      acc[el.name] = el.value;
+      if (el.name === 'birthDate') {
+        let { value } = el;
+        if (
+          value.match(/\d{2}$/) &&
+          value.match(/\d{2}$/)[0] &&
+          !value.match(/\d{4}$/)
+        ) {
+          const match = value.match(/\d{2}$/)[0];
+          const year = new Date().getFullYear().toString();
+
+          if (match <= year.slice(2)) {
+            value = value.replace(/\d{2}$/, (g) => `${year.slice(0, 2)}${g}`);
+          } else {
+            value = value.replace(
+              /\d{2}$/,
+              (g) => `${year.slice(0, 2) - 1}${g}`
+            );
+          }
+        }
+        acc[el.name] = value;
+      } else {
+        acc[el.name] = el.value;
+      }
 
       if (wasSubmited) {
         if (validators[el.name] && !validators[el.name](el.value)) {
