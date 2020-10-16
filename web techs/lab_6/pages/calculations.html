@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="../favicon.png" type="image/x-icon" />
+    <title>Calculations</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/style.css" />
+  </head>
+  <body>
+    <header class="bg-dark py-4"></header>
+
+    <nav
+      class="navbar navbar-expand-lg navbar-dark bg-dark border-top py-0 sticky-top"
+    >
+      <div class="container">
+        <div class="menu"></div>
+
+        <a href="./auth.html" class="menu-link ml-auto">
+          <i class="ri-user-add-line"></i>
+          <span class="ml-2">Sign Up</span>
+        </a>
+      </div>
+    </nav>
+
+    <main class="container py-4">
+      <div class="d-flex">
+        <span class="text-nowrap"> Select calculation: </span>
+
+        <div class="d-flex flex-wrap" id="calculation-types"></div>
+      </div>
+
+      <form onsubmit="calculate(event)" class="mt-4 w-fit">
+        <h3 data-if-calculation="square_area">Enter value of square side</h3>
+        <h3 data-if-calculation="circle_area">Enter value of circle radius</h3>
+        <h3 data-if-calculation="triangle_area">Enter value of triangle leg</h3>
+        <h3 data-if-calculation="circle_length">
+          Enter value of circle radius
+        </h3>
+        <h3 data-if-calculation="sphere_volume">
+          Enter value of sphere radius
+        </h3>
+        <input
+          type="text"
+          name="value"
+          class="form-control"
+          placeholder="Value"
+        />
+
+        <div class="btn-group mt-2 w-100">
+          <button type="submit" class="btn btn-sm btn-success">
+            Calculate
+          </button>
+
+          <button onclick="clearCalculation()" class="btn btn-sm btn-light">
+            Clear
+          </button>
+        </div>
+      </form>
+
+      <div class="d-flex mt-4 h3">
+        <span>
+          <span class="text-capitalize" data-if-calculation="square_area">
+            square area
+          </span>
+          <span class="text-capitalize" data-if-calculation="circle_area">
+            circle area
+          </span>
+          <span class="text-capitalize" data-if-calculation="triangle_area">
+            triangle area
+          </span>
+          <span class="text-capitalize" data-if-calculation="circle_length">
+            circle length
+          </span>
+          <span class="text-capitalize" data-if-calculation="sphere_volume">
+            sphere volume
+          </span>
+          is:
+        </span>
+
+        <span id="result" class="ml-3"></span>
+      </div>
+    </main>
+
+    <footer class="py-5 bg-dark mt-auto"></footer>
+
+    <script src="../scripts/common.js"></script>
+    <script src="../scripts/calculations.js"></script>
+  </body>
+</html>
