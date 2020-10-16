@@ -2,20 +2,6 @@ let photoFile;
 let wasSubmited;
 const form = document.forms.authForm;
 
-const formatDateInput = ({ target }) => {
-  let value = target.value.replace(/\/|\D/g, '');
-
-  value = value.replace(
-    /[0-9]{2}/g,
-    (g, i) =>
-      `${g.toLowerCase()}${
-        (i < 2 && value.length > 2) || (i < 3 && value.length > 4) ? '/' : ''
-      }`
-  );
-
-  target.value = value.slice(0, 10);
-};
-
 const readFileData = (file) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -40,23 +26,40 @@ const previewPhoto = async ({ target }) => {
 
 const validators = {
   firstName: (value) => {
-    const regex = /^\w+(-\w+)?$/;
-    return regex.test(value.trim());
+    const regex = /^\w+'?\w+((-| )\w+'?\w+){0,2}$/;
+    const regex_2 = /^\w+'?\w+(-\w+'?\w+){2}$/;
+    const regex_3 = /^\w+'?\w+( \w+'?\w+){2}$/;
+    return (
+      regex.test(value.trim()) &&
+      !regex_2.test(value.trim()) &&
+      !regex_3.test(value.trim())
+    );
   },
   lastName: (value) => {
-    const regex = /^\w+(-\w+)?$/;
-    return regex.test(value.trim());
+    const regex = /^\w+'?\w+((-| )\w+'?\w+){0,2}$/;
+    const regex_2 = /^\w+'?\w+(-\w+'?\w+){2}$/;
+    const regex_3 = /^\w+'?\w+( \w+'?\w+){2}$/;
+    return (
+      regex.test(value.trim()) &&
+      !regex_2.test(value.trim()) &&
+      !regex_3.test(value.trim())
+    );
   },
   birthDate: (value) => {
     const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-    return regex.test(value.trim());
+    const regex_2 = /^\d{2}\.\d{2}\.\d{4}$/;
+    return regex.test(value.trim()) || regex_2.test(value.trim());
   },
   email: (value) => {
-    const regex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+    const regex = /^[A-Za-z](?=.{0,254}$)(?=.{0,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]*(\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?){0,5}\.[A-Za-z0-9]{2,5}$/;
     return regex.test(value.trim());
   },
+  interests: (value) => {
+    return !!value.trim();
+  },
   password: (value) => {
-    return value.trim().length >= 6;
+    const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/;
+    return regex.test(value.trim());
   },
   confirmPassword: (value, confirmValue) => {
     return value === confirmValue;

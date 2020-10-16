@@ -61,7 +61,6 @@
         <div class="form-group">
           <label>Birth date</label>
           <input
-            oninput="formatDateInput(event)"
             name="birthDate"
             type="text"
             class="form-control"
@@ -150,7 +149,7 @@
         </div>
 
         <div class="form-group">
-          <label>Interests <small class="text-muted">(optional)</small></label>
+          <label>Interests</label>
 
           <textarea
             name="interests"
@@ -159,6 +158,8 @@
             maxlength="500"
             placeholder="Lorem ipsum dolor sit amet consectetur adipisicing elit."
           ></textarea>
+
+          <div class="invalid-feedback">Field is required</div>
         </div>
 
         <div class="form-group">
@@ -168,6 +169,7 @@
             <input
               onchange="previewPhoto(event)"
               name="photo"
+              accept="image/*"
               type="file"
               class="dropzone-input"
               title=""
@@ -188,7 +190,8 @@
             placeholder="********"
           />
           <div class="invalid-feedback">
-            Password must be at least 6 characters long
+            Password must be at least 6 characters long , includes numbers,
+            upper and lower case letters
           </div>
         </div>
 
