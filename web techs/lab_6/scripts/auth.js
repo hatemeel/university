@@ -24,6 +24,10 @@ const previewPhoto = async ({ target }) => {
   target.value = null;
 };
 
+const daysInMonth = (year, month) => {
+  return new Date(year, month, 0).getDate();
+};
+
 const validators = {
   firstName: (value) => {
     const regex = /^[A-Z][a-z]+'?[a-z]+((-| )[A-Z][a-z]+'?[a-z]+){0,2}$/;
@@ -64,11 +68,23 @@ const validators = {
       }
     }
 
-    if (
-      value.match(/\d{4}$/) &&
-      value.match(/\d{4}$/)[0] < new Date().getFullYear() - 90
-    ) {
-      return false;
+    if (regex.test(value.trim()) || regex_2.test(value.trim())) {
+      if (
+        value.match(/^\d{2}/)[0] >
+          daysInMonth(
+            value.match(/\d{4}$/)[0],
+            value.match(/(?<=(\/|\.))\d{2}(?=(\/|\.))/)[0]
+          ) ||
+        parseInt(value.match(/^\d{2}/)[0], 10) < 1 ||
+        parseInt(value.match(/(?<=(\/|\.))\d{2}(?=(\/|\.))/)[0], 10) < 1 ||
+        parseInt(value.match(/(?<=(\/|\.))\d{2}(?=(\/|\.))/)[0], 10) > 12
+      ) {
+        return false;
+      }
+
+      if (value.match(/\d{4}$/)[0] < new Date().getFullYear() - 90) {
+        return false;
+      }
     }
     return regex.test(value.trim()) || regex_2.test(value.trim());
   },
