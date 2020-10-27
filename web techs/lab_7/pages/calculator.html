@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="../favicon.png" type="image/x-icon" />
+    <title>Calculator</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/style.css" />
+  </head>
+  <body>
+    <header class="bg-dark py-4"></header>
+
+    <nav
+      class="navbar navbar-expand-lg navbar-dark bg-dark border-top py-0 sticky-top"
+    >
+      <div class="container">
+        <div class="menu"></div>
+
+        <a href="./auth.html" class="menu-link ml-auto">
+          <i class="ri-user-add-line"></i>
+          <span class="ml-2">Sign Up</span>
+        </a>
+      </div>
+    </nav>
+
+    <main class="container py-4">
+      <div class="card shadow-sm calculator">
+        <div class="card-body">
+          <div class="form-group">
+            <div class="form-control"></div>
+          </div>
+
+          <div class="calculator-units">
+            <div class="d-grid">
+              <div class="btn shadow-sm btn-light" data-unit="clear">AC</div>
+              <div class="btn shadow-sm btn-warning" data-unit="/">
+                <i class="ri-divide-line"></i>
+              </div>
+            </div>
+
+            <div class="d-grid">
+              <div class="btn shadow-sm btn-secondary" data-unit="7">7</div>
+              <div class="btn shadow-sm btn-secondary" data-unit="8">8</div>
+              <div class="btn shadow-sm btn-secondary" data-unit="9">9</div>
+              <div class="btn shadow-sm btn-warning" data-unit="x">
+                <i class="ri-close-line"></i>
+              </div>
+            </div>
+
+            <div class="d-grid">
+              <div class="btn shadow-sm btn-secondary" data-unit="4">4</div>
+              <div class="btn shadow-sm btn-secondary" data-unit="5">5</div>
+              <div class="btn shadow-sm btn-secondary" data-unit="6">6</div>
+              <div class="btn shadow-sm btn-warning" data-unit="-">
+                <i class="ri-subtract-line"></i>
+              </div>
+            </div>
+
+            <div class="d-grid">
+              <div class="btn shadow-sm btn-secondary" data-unit="1">1</div>
+              <div class="btn shadow-sm btn-secondary" data-unit="2">2</div>
+              <div class="btn shadow-sm btn-secondary" data-unit="3">3</div>
+              <div class="btn shadow-sm btn-warning" data-unit="+">
+                <i class="ri-add-line"></i>
+              </div>
+            </div>
+
+            <div class="d-grid">
+              <div class="btn shadow-sm btn-secondary" data-unit="0">0</div>
+              <div class="btn shadow-sm btn-secondary" data-unit=".">.</div>
+              <div class="btn shadow-sm btn-warning" data-unit="=">=</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="py-5 bg-dark mt-auto"></footer>
+
+    <script src="../scripts/common.js"></script>
+    <script src="../scripts/calculator.js"></script>
+  </body>
+</html>

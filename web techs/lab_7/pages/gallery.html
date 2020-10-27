@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="../favicon.png" type="image/x-icon" />
+    <title>Gallery</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/style.css" />
+  </head>
+  <body>
+    <header class="bg-dark py-4"></header>
+
+    <nav
+      class="navbar navbar-expand-lg navbar-dark bg-dark border-top py-0 sticky-top"
+    >
+      <div class="container">
+        <div class="menu"></div>
+
+        <a href="./auth.html" class="menu-link ml-auto">
+          <i class="ri-user-add-line"></i>
+          <span class="ml-2">Sign Up</span>
+        </a>
+      </div>
+    </nav>
+
+    <main class="container py-4">
+      <div class="gallery shadow">
+        <div class="gallery-view">
+          <img src="" alt="" />
+
+          <div class="gallery-controls">
+            <div onclick="prev()" class="gallery-controls__item shadow prev">
+              <i class="ri-arrow-left-s-line"></i>
+            </div>
+
+            <div onclick="next()" class="gallery-controls__item shadow next">
+              <i class="ri-arrow-right-s-line"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery-thumbnails"></div>
+      </div>
+    </main>
+
+    <footer class="py-5 bg-dark mt-auto"></footer>
+
+    <script src="../scripts/common.js"></script>
+    <script src="../scripts/gallery.js"></script>
+  </body>
+</html>
