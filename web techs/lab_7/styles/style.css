@@ -286,4 +286,37 @@ label {
   -webkit-transition: 0.15s;
   transition: 0.15s;
 }
+
+.image-effects-container {
+  -webkit-filter: drop-shadow(0 0.5rem 1rem rgba(0, 0, 0, 0.15));
+          filter: drop-shadow(0 0.5rem 1rem rgba(0, 0, 0, 0.15));
+}
+
+.image-effects-container img {
+  width: 300px;
+  height: 300px;
+  -o-object-fit: cover;
+     object-fit: cover;
+  border-radius: 50%;
+  -webkit-transition: 0.15s;
+  transition: 0.15s;
+}
+
+.image-effects-container img.opacity-50 {
+  opacity: 0.25;
+}
+
+.autocomplete-suggestions {
+  background-color: white;
+  border-radius: 0.25rem;
+  border: 1px solid #dee2e6;
+}
+
+.autocomplete-suggestion {
+  padding: 0.25rem 1rem;
+}
+
+.autocomplete-selected {
+  background-color: rgba(0, 123, 255, 0.25);
+}
 /*# sourceMappingURL=style.css.map */

@@ -1,4 +1,5 @@
 let photoFile;
+let photoPreview;
 let wasSubmited;
 const form = document.forms.authForm;
 
@@ -19,6 +20,7 @@ const previewPhoto = async ({ target }) => {
   photoFile = file;
 
   const src = await readFileData(file);
+  photoPreview = src;
 
   target.parentElement.querySelector('.dropzone-preview').src = src;
   target.value = null;
@@ -174,11 +176,11 @@ const validateForm = () => {
     []
   );
 
-  if (!selectedLanguages.length) {
+  if (!selectedLanguages.length && wasSubmited) {
     form.querySelector('.langs-error').classList.add('d-block');
+    valid = false;
   } else {
     form.querySelector('.langs-error').classList.remove('d-block');
-    valid = false;
   }
 
   if (!valid) {
@@ -187,14 +189,38 @@ const validateForm = () => {
     form.classList.remove('border-danger');
   }
 
-  return { ...controls, selectedLanguages };
+  return { controls: { ...controls, selectedLanguages }, valid };
 };
 
 const onFormSubmit = (event) => {
   event.preventDefault();
   wasSubmited = true;
 
-  const controls = validateForm();
+  const { controls, valid } = validateForm();
 
-  console.log(controls);
+  if (!valid) {
+    return;
+  }
+
+  $('[authModal] .modal-body tbody').html(
+    Object.keys(controls).reduce(
+      (acc, key) =>
+        acc +
+        `
+					<tr>
+						<td>${key}</td>
+						<td>${
+              (key === 'photo' && photoPreview
+                ? `
+										<img class="w-100" src="${photoPreview}">
+									`
+                : controls[key]) || 'No data provided'
+            }</td>
+					</tr>
+				`,
+      ''
+    )
+  );
+
+  $('[authModal]').modal('show');
 };

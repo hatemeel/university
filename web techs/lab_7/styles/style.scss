@@ -238,3 +238,34 @@ label {
   transform-origin: left top;
   transition: 0.15s;
 }
+
+.image-effects-container {
+  filter: drop-shadow(0 0.5rem 1rem rgba(0, 0, 0, 0.15));
+  img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: 0.15s;
+
+    &.opacity-50 {
+      opacity: 0.25;
+    }
+  }
+}
+
+.autocomplete {
+  &-suggestions {
+    background-color: white;
+    border-radius: 0.25rem;
+    border: 1px solid #dee2e6;
+  }
+
+  &-suggestion {
+    padding: 0.25rem 1rem;
+  }
+
+  &-selected {
+    background-color: rgba(#007bff, 0.25);
+  }
+}

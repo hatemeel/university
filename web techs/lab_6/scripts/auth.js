@@ -174,11 +174,11 @@ const validateForm = () => {
     []
   );
 
-  if (!selectedLanguages.length) {
+  if (!selectedLanguages.length && wasSubmited) {
     form.querySelector('.langs-error').classList.add('d-block');
+    valid = false;
   } else {
     form.querySelector('.langs-error').classList.remove('d-block');
-    valid = false;
   }
 
   if (!valid) {

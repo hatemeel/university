@@ -30,7 +30,9 @@
     <main class="container py-4">
       <!-- Task 1 -->
       <div collapse>
-        <button class="btn btn-dark" collapse-toggle>Collapse toggle</button>
+        <button class="btn btn-secondary" collapse-toggle>
+          Collapse toggle
+        </button>
         <div class="mt-3" collapse-content>
           <div class="card card-body">
             <p>Lorem ipsum dolor sit amet.</p>
@@ -85,12 +87,50 @@
       </div>
 
       <hr />
+
+      <!-- Task 4 -->
+      <div class="image-effects-container">
+        <img
+          onmouseover="onImageHover()"
+          class="card image-effects-target"
+          src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+          alt=""
+        />
+
+        <button
+          onclick="toggleOpacity(event)"
+          class="btn btn-sm btn-secondary mt-2"
+        >
+          Toggle opacity
+        </button>
+      </div>
+
+      <hr />
+
+      <!-- Task 5 -->
+      <table class="table target-table">
+        <tbody></tbody>
+      </table>
+
+      <button onclick="markTable()" class="btn btn-sm btn-secondary">
+        Mark
+      </button>
+
+      <hr />
+
+      <!-- Task 6 -->
+      <div class="form-group">
+        <label>Countries typeahead</label>
+        <input typeahead class="form-control" type="text" autocomplete="off" />
+      </div>
     </main>
 
     <footer class="py-5 bg-dark mt-auto"></footer>
 
-    <script src="../scripts/common.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.devbridge-autocomplete/1.4.11/jquery.autocomplete.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="../scripts/common.js"></script>
     <script src="../scripts/jquery-tasks.js"></script>
   </body>
 </html>
