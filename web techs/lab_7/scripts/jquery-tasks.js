@@ -131,6 +131,9 @@ function markTable() {
         }))
       ),
     lookupLimit: 5,
+    lookupFilter: (suggestion, query, queryLowerCase) => {
+      return suggestion.value.toLowerCase().startsWith(queryLowerCase);
+    },
     autoSelectFirst: true,
     orientation: 'auto',
   });
