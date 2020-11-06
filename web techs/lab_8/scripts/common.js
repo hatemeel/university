@@ -74,7 +74,8 @@ function genList(array, title = '') {
 
 function http(url) {
   return new Promise((resolve, reject) => {
-    const xml = new XMLHttpRequest();
+    const xml = createXMLHTTPObject();
+    console.log(xml);
     xml.open('get', url);
 
     xml.onload = ({ target: { response } }) => {
@@ -87,4 +88,23 @@ function http(url) {
 
     xml.send();
   });
+}
+
+function createXMLHTTPObject() {
+  return (
+    [
+      () => new XMLHttpRequest(),
+      () => new ActiveXObject('Msxml3.XMLHTTP'),
+      () => new ActiveXObject('Msxml2.XMLHTTP.6.0'),
+      () => new ActiveXObject('Msxml2.XMLHTTP.3.0'),
+      () => new ActiveXObject('Msxml2.XMLHTTP'),
+      () => new ActiveXObject('Microsoft.XMLHTTP'),
+    ].find((xmlhttp) => {
+      try {
+        return xmlhttp();
+      } catch {
+        return false;
+      }
+    })() || false
+  );
 }
