@@ -75,7 +75,7 @@ function genList(array, title = '') {
 function http(url) {
   return new Promise((resolve, reject) => {
     const xml = new XMLHttpRequest();
-    xml.open('get', url, true);
+    xml.open('get', url);
 
     xml.onload = ({ target: { response } }) => {
       try {
