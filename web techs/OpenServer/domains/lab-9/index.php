@@ -57,33 +57,15 @@
 			<div class="card-header">Task 3</div>
 			<pre class="card-body border-bottom">
 				$number = 11;
-				$counter = 0;
 
-				while ($i <= $number) {
-					if (strpos(strval($i), strval($number)[0]) !== false) {
-						$counter += substr_count(strval($i), strval($number)[0]);
-					}
-
-					$i++;
-				}
-
-				echo $number . ' has ' . $counter . ' of ' . strval($number)[0];
+				echo $number . ' has ' . substr_count(strval($number), strval($number)[0]) . ' of ' . strval($number)[0];
 			</pre>
 
 			<div class="card-body">
 				<?php
 				$number = 11;
-				$counter = 0;
 
-				while ($i <= $number) {
-					if (strpos(strval($i), strval($number)[0]) !== false) {
-						$counter += substr_count(strval($i), strval($number)[0]);
-					}
-
-					$i++;
-				}
-
-				echo $number . ' has ' . $counter . ' of ' . strval($number)[0];
+				echo $number . ' has ' . substr_count(strval($number), strval($number)[0]) . ' of ' . strval($number)[0];
 				?>
 			</div>
 		</section>
