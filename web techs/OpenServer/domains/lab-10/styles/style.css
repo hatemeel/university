@@ -1,4 +1,5 @@
 @import url(https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css);
+@import url(https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css);
 body {
   min-height: 100vh;
   display: -webkit-box;
@@ -25,6 +26,41 @@ label {
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
+}
+
+.header {
+  height: 80px;
+  padding: 0 1.5rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.header .user-data {
+  margin-left: auto;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.header .user-data .user-name {
+  margin-right: 1rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.header .user-data .user-photo {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 
 .menu {
@@ -93,6 +129,25 @@ label {
 .menu-sub .menu-sub {
   left: calc(100%);
   top: 0;
+}
+
+.navbar {
+  -webkit-transition: 0.15s;
+  transition: 0.15s;
+}
+
+.navbar.sticked {
+  -webkit-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  background-color: rgba(52, 58, 64, 0.85) !important;
+  -webkit-backdrop-filter: blur(2px);
+          backdrop-filter: blur(2px);
+  margin-bottom: 0.5rem;
+}
+
+.navbar.sticked .menu-link {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .auth-controls {
@@ -325,5 +380,61 @@ label {
 
 .autocomplete-selected {
   background-color: rgba(0, 123, 255, 0.25);
+}
+
+.toast {
+  opacity: 0.85 !important;
+  -webkit-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.toast-success {
+  background-color: var(--success);
+}
+
+.toast-error {
+  background-color: var(--danger);
+}
+
+.users-table td {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.users-table td.w-fit {
+  width: 1px;
+}
+
+.users-table .user-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+.search-input {
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.search-input .form-control {
+  padding-left: 30px;
+}
+
+.search-input i {
+  pointer-events: none;
+  position: absolute;
+  left: 0.5rem;
+}
+
+.badge {
+  cursor: default;
 }
 /*# sourceMappingURL=style.css.map */

@@ -167,6 +167,13 @@
     },
   ];
 
+  if (localStorage.getItem('authToken')) {
+    menuItems.push({
+      title: 'Users',
+      link: 'users.html',
+    });
+  }
+
   menu.innerHTML = menuItems
     .map((item) => getMenuItemHTML(item))
     .join('')
@@ -217,7 +224,7 @@
 // auth controls
 (() => {
   const authControlsWrapper = document.querySelector('nav .auth-controls');
-  const isLoggedIn = !!localStorage.getItem('auth-token');
+  const isLoggedIn = !!localStorage.getItem('authToken');
 
   if (isLoggedIn) {
     authControlsWrapper.innerHTML = `
@@ -240,7 +247,36 @@
   }
 })();
 
+// header configuration
+(async () => {
+  const header = document.querySelector('header');
+  const userDataBlock = header.querySelector('.user-data');
+  const navbar = document.querySelector('.navbar');
+
+  window.onscroll = () => {
+    if (window.scrollY > header.offsetHeight) {
+      navbar.classList.add('sticked');
+    } else {
+      navbar.classList.remove('sticked');
+    }
+  };
+
+  // get current user data
+  if (localStorage.getItem('authToken')) {
+    const { userData } = await fetch('/api/me.php', {
+      headers: new Headers({
+        authorization: localStorage.getItem('authToken'),
+      }),
+    }).then((r) => r.json());
+
+    userDataBlock.innerHTML = `
+			<span class="user-name">${userData.firstName} ${userData.lastName}</span>
+    	<img class="user-photo" src="${userData.photoUrl}" alt="" onerror="onImageError(event)" />
+    `;
+  }
+})();
+
 function signOut() {
-  localStorage.removeItem('auth-token');
+  localStorage.removeItem('authToken');
   location.reload();
 }

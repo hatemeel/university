@@ -1,4 +1,5 @@
 @import url(https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css);
+@import url(https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css);
 
 body {
   min-height: 100vh;
@@ -18,6 +19,32 @@ label {
 
 .w-fit {
   width: fit-content;
+}
+
+.header {
+  height: 80px;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+
+  .user-data {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+
+    .user-name {
+      margin-right: 1rem;
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+
+    .user-photo {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
 }
 
 .menu {
@@ -75,6 +102,22 @@ label {
     .menu-sub {
       left: calc(100%);
       top: 0;
+    }
+  }
+}
+
+.navbar {
+  transition: 0.15s;
+
+  &.sticked {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    background-color: rgba(52, 58, 64, 0.85) !important;
+    backdrop-filter: blur(2px);
+    margin-bottom: 0.5rem;
+
+    .menu-link {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
     }
   }
 }
@@ -273,4 +316,55 @@ label {
   &-selected {
     background-color: rgba(#007bff, 0.25);
   }
+}
+
+.toast {
+  opacity: 0.85 !important;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+
+  &-success {
+    background-color: var(--success);
+  }
+  &-error {
+    background-color: var(--danger);
+  }
+}
+
+.users-table {
+  td {
+    vertical-align: middle;
+    white-space: nowrap;
+
+    &.w-fit {
+      width: 1px;
+    }
+  }
+
+  .user-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+  }
+}
+
+.search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .form-control {
+    padding-left: 30px;
+  }
+
+  i {
+    pointer-events: none;
+    position: absolute;
+    left: 0.5rem;
+  }
+}
+
+.badge {
+  cursor: default;
 }

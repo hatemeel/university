@@ -1,3 +1,7 @@
+if (localStorage.getItem('authToken')) {
+  location.replace('/');
+}
+
 let photoFile;
 let photoPreview;
 let wasSubmited;
@@ -147,7 +151,7 @@ const validateForm = ({ showValidation = true } = {}) => {
             );
           }
         }
-        acc[el.name] = value;
+        acc[el.name] = value.replace(/\//g, '.');
       } else {
         acc[el.name] = el.value;
       }
@@ -192,7 +196,7 @@ const validateForm = ({ showValidation = true } = {}) => {
   return { controls: { ...controls, selectedLanguages }, valid };
 };
 
-const onFormSubmit = (event) => {
+const onFormSubmit = async (event) => {
   event.preventDefault();
   wasSubmited = true;
 
@@ -208,16 +212,18 @@ const onFormSubmit = (event) => {
     formData.append(key, controls[key]);
   });
 
-  fetch('/api/register.php', {
-    method: 'post',
-    body: formData,
-  })
-    .then((r) => r.json())
-    .then((res) => {
-      console.log(res);
-    });
+  try {
+    const { success, message } = await fetch('/api/register.php', {
+      method: 'post',
+      body: formData,
+    }).then((r) => r.json());
 
-  console.log('[auth user]', controls);
+    if (success) {
+      location.replace('login.html');
+    } else {
+      toastr.error(message);
+    }
+  } catch {}
 };
 
 const openPreviewModal = () => {
