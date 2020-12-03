@@ -98,7 +98,15 @@ if (!localStorage.getItem('authToken')) {
 								<a href="mailto:${email}">${email}</a>
 							</td>
 							<td class="w-fit">
-								<div onclick="selectUser('${id}')" class="btn btn-sm btn-outline-info">Details</div>
+							<div class="d-flex">
+									<div onclick="selectUser('${id}')" class="btn btn-sm btn-outline-info">Details</div>
+								
+									${
+                    (isMe &&
+                      `<div onclick="deleteUser('${id}', true)" class="btn btn-sm btn-outline-danger ml-3">Delete</div>`) ||
+                    ''
+                  }
+								</div>
 							</td>
 						</tr>
 					`,
@@ -144,20 +152,27 @@ if (!localStorage.getItem('authToken')) {
     $('[authModal]').modal('show');
   }
 
-  async function deleteUser(uid) {
-    const { isConfirmed } = await Swal.fire({
+  function deleteUser(uid, fireSignOut = false) {
+    Swal.fire({
       title: 'Error!',
       text: 'Do you want to delete this user?',
       icon: 'error',
       showCancelButton: true,
       confirmButtonText: 'Yes',
       cancelButtonText: 'No',
-    });
+    }).then(async ({ isConfirmed }) => {
+      if (isConfirmed) {
+        await fetch(`/api/deleteUser.php?userId=${uid}`);
 
-    if (isConfirmed) {
-      await fetch(`/api/deleteUser.php?userId=${uid}`);
-      fetchUsers();
-    }
+        if (fireSignOut) {
+          localStorage.removeItem('authToken');
+          location.reload();
+          return;
+        }
+
+        fetchUsers();
+      }
+    });
   }
 
   function transformLanguages(user) {
